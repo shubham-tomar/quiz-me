@@ -1,15 +1,37 @@
-import { Text, View } from "react-native";
+import React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { common, colors } from '../styles';
 
-export default function Index() {
+export default function HomeScreen() {
+  const router = useRouter();
+
+  const navigateToCreateQuiz = () => {
+    router.push('/(screens)/create-quiz');
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Hello! Quiz me</Text>
-    </View>
+    <SafeAreaView style={common.container}>
+      <View style={[common.contentContainer, styles.centeredContent]}>
+        <Text style={common.title}>Quiz Me</Text>
+        <Text style={common.subtitle}>Create and take quizzes on any topic</Text>
+        
+        <TouchableOpacity 
+          style={common.button}
+          onPress={navigateToCreateQuiz}
+        >
+          <Text style={common.buttonText}>Create New Quiz</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
+
+// We only need custom styles that aren't covered by our common styles
+const styles = StyleSheet.create({
+  centeredContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
