@@ -18,7 +18,6 @@ import { colors, spacing, fontSize } from '../styles';
 const SIDEBAR_WIDTH = 250;
 const COLLAPSED_WIDTH = 60;
 
-// Define proper interfaces with correct types
 interface SidebarStyles {
   sidebar: ViewStyle;
   header: ViewStyle;
@@ -38,13 +37,11 @@ export function Sidebar() {
   const insets = useSafeAreaInsets();
   const [animation] = useState(new Animated.Value(0));
 
-  // Define the valid routes as a type
   type AppRoutes = '/' | '/(screens)/create-quiz';
 
-  // Use the typed routes in our menu items
   const menuItems = [
-    { icon: 'home-outline', label: 'Home', path: '/' as AppRoutes },
-    { icon: 'add-circle-outline', label: 'Create Quiz', path: '/(screens)/create-quiz' as AppRoutes },
+    { icon: 'home-outline' as const, label: 'Home', path: '/' as AppRoutes },
+    { icon: 'add-circle-outline' as const, label: 'Create Quiz', path: '/(screens)/create-quiz' as AppRoutes },
   ];
 
   const toggleSidebar = () => {
@@ -68,7 +65,7 @@ export function Sidebar() {
     sidebar: {
       width: sidebarWidth,
       paddingTop: Platform.OS === 'web' ? 0 : insets.top,
-    } as any, // Use 'any' to avoid type issues with animated styles
+    } as any,
   };
 
   return (
@@ -122,7 +119,6 @@ export function Sidebar() {
   );
 }
 
-// Use StyleSheet.create with proper types
 const styles = StyleSheet.create<SidebarStyles>({
   sidebar: {
     height: '100%',
@@ -145,7 +141,7 @@ const styles = StyleSheet.create<SidebarStyles>({
   logo: {
     color: '#ffffff',
     fontSize: fontSize.l,
-    fontWeight: '700', // Using string literal instead of fontWeight.bold
+    fontWeight: '700',
   },
   toggleButton: {
     padding: spacing.xs,
@@ -171,6 +167,6 @@ const styles = StyleSheet.create<SidebarStyles>({
   },
   activeMenuLabel: {
     color: colors.primary,
-    fontWeight: '600', // Using string literal instead of fontWeight.semiBold
+    fontWeight: '600',
   },
 });

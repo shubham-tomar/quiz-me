@@ -28,7 +28,6 @@ export default function HomeScreen() {
   );
 }
 
-// We only need custom styles that aren't covered by our common styles
 const styles = StyleSheet.create({
   centeredContent: {
     justifyContent: 'center',

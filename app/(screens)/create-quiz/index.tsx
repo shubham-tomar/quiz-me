@@ -18,7 +18,7 @@ type ContentSourceType = 'text' | 'pdf' | 'url';
 interface DropdownItem {
   label: string;
   value: ContentSourceType;
-  icon: string;
+  icon: 'document-text-outline' | 'document-outline' | 'globe-outline';
 }
 
 export default function CreateQuizScreen() {
@@ -30,9 +30,9 @@ export default function CreateQuizScreen() {
   const [urlContent, setUrlContent] = useState('');
   
   const contentSourceOptions: DropdownItem[] = [
-    { label: 'Text', value: 'text', icon: 'document-text-outline' },
-    { label: 'PDF', value: 'pdf', icon: 'document-outline' },
-    { label: 'Web URL', value: 'url', icon: 'globe-outline' }
+    { label: 'Text', value: 'text', icon: 'document-text-outline' as const },
+    { label: 'PDF', value: 'pdf', icon: 'document-outline' as const },
+    { label: 'Web URL', value: 'url', icon: 'globe-outline' as const }
   ];
   
   const selectedOption = contentSourceOptions.find(option => option.value === contentSource);
