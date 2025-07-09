@@ -4,13 +4,15 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { WebSidebar } from '../components/WebSidebar';
 import { MobileSidebar } from '../components/MobileSidebar';
-import { colors } from '../styles';
+import { colors } from '../styles'
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 // Constants from Sidebar component for consistency
 const SIDEBAR_WIDTH = 250;
 const COLLAPSED_WIDTH = 60;
 
 export default function RootLayout() {
+  useFrameworkReady();
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
