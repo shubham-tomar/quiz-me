@@ -1,72 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform } from 'react-native';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { WebSidebar } from '../components/WebSidebar';
-import { MobileSidebar } from '../components/MobileSidebar';
-import { colors } from '../styles'
+import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+import { SplashScreen } from 'expo-router';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
-// Constants from Sidebar component for consistency
-const SIDEBAR_WIDTH = 250;
-const COLLAPSED_WIDTH = 60;
+// Prevent splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useFrameworkReady();
-  const [dimensions, setDimensions] = useState(Dimensions.get('window'));
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+    'Inter-Bold': Inter_700Bold,
+    'Poppins-Regular': Poppins_400Regular,
+    'Poppins-Medium': Poppins_500Medium,
+    'Poppins-SemiBold': Poppins_600SemiBold,
+    'Poppins-Bold': Poppins_700Bold,
+  });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      setDimensions(window);
-    });
-    return () => subscription.remove();
-  }, []);
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
-  const isMobile = dimensions.width < 768;
-  
-  // Handle sidebar collapsed state changes
-  const handleSidebarCollapsedChange = (collapsed: boolean) => {
-    setIsSidebarCollapsed(collapsed);
-  };
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        {isMobile ? (
-          <MobileSidebar onCollapsedChange={handleSidebarCollapsedChange} />
-        ) : (
-          <WebSidebar onCollapsedChange={handleSidebarCollapsedChange} />
-        )}
-        <View 
-          style={[
-            styles.content,
-            !isMobile && {
-              position: 'absolute',
-              left: isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH,
-              width: `calc(100% - ${isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH}px)`
-            }
-          ]}
-        >
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          />
-        </View>
-      </View>
-    </SafeAreaProvider>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-  },
-});
