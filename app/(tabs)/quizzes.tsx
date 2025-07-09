@@ -11,16 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Search,
-  Filter,
-  Clock,
-  Users,
-  Star,
-  Play,
-  BookOpen,
-  Trophy,
-} from 'lucide-react-native';
+import { Search, ListFilter as Filter, Clock, Users, Star, Play, BookOpen, Trophy } from 'lucide-react-native';
 import { colors, spacing, fontSize, borderRadius } from '../../styles/theme';
 
 const { width } = Dimensions.get('window');

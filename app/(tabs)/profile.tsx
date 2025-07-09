@@ -10,23 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  User,
-  Settings,
-  Bell,
-  Shield,
-  HelpCircle,
-  LogOut,
-  Edit,
-  Award,
-  Trophy,
-  Target,
-  Calendar,
-  ChevronRight,
-  Moon,
-  Globe,
-  Volume2,
-} from 'lucide-react-native';
+import { User, Settings, Bell, Shield, Circle as HelpCircle, LogOut, LocationEdit as Edit, Award, Trophy, Target, Calendar, ChevronRight, Moon, Globe, Volume2 } from 'lucide-react-native';
 import { colors, spacing, fontSize, borderRadius } from '../../styles/theme';
 
 interface AchievementProps {
