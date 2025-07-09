@@ -38,11 +38,10 @@ export default function RootLayout() {
         )}
         <View 
           style={[
-            styles.content, 
-            { 
-              marginLeft: Platform.OS === 'web' ? 
-                (isMobile ? 0 : (isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH)) : 
-                0, // No margin needed for mobile platforms
+            styles.content,
+            Platform.OS === 'web' && {
+              position: 'absolute',
+              left: isMobile ? 0 : (isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH),
               width: '100%'
             }
           ]}
@@ -68,5 +67,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 });

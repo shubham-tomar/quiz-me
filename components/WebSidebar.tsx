@@ -134,7 +134,9 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
   const insets = useSafeAreaInsets();
-  const widthAnim = React.useRef(new Animated.Value(0)).current;
+  
+  // Initialize animation value to 1 (collapsed) since we start collapsed
+  const widthAnim = React.useRef(new Animated.Value(1)).current;
   
   // For responsive design
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
@@ -316,6 +318,13 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
     inputRange: [0, 1],
     outputRange: [SIDEBAR_WIDTH, COLLAPSED_WIDTH],
   });
+  
+  // Notify parent of initial collapsed state on mount
+  useEffect(() => {
+    if (onCollapsedChange) {
+      onCollapsedChange(isCollapsed);
+    }
+  }, []);
 
   return (
     <Animated.View 
@@ -329,6 +338,8 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
         },
         isMobile && styles.mobileSidebar,
       ]}
+      // Add testID for debugging
+      testID="web-sidebar"
     >
       <View style={styles.header}>
         {!isCollapsed && (

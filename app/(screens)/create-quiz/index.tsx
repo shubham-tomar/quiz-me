@@ -122,7 +122,7 @@ export default function CreateQuizScreen() {
   
   return (
     <SafeAreaView style={common.container} edges={['bottom']}>
-      <View style={common.header}>
+      <View style={[common.header, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={common.headerTitle}>Create Quiz</Text>
       </View>
 
