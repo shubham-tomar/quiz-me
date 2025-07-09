@@ -142,6 +142,20 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   const { width: screenWidth } = Dimensions.get('window');
   const isMobile = screenWidth < 768;
+  
+  // Notify parent of initial collapsed state on mount
+  useEffect(() => {
+    if (onCollapsedChange) {
+      onCollapsedChange(isCollapsed);
+    }
+    
+    // Update dimensions when screen size changes
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions(window);
+    });
+    
+    return () => subscription.remove();
+  }, []);
 
   // Initialize expanded state based on defaultExpanded
   useEffect(() => {

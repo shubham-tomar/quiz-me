@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable, Alert, ActivityIndicator, ViewStyle, TextStyle, StyleProp, ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { common, colors, spacing, fontSize, borderRadius } from '../../../styles';
+import * as DocumentPicker from 'expo-document-picker';
+import { common } from '../../../styles/common';
+import { colors, spacing, fontSize, borderRadius } from '../../../styles';
+import { generateQuiz, QuizQuestion } from '../../src/quiz-gen';
+import { ExtendedPressableStateCallbackType } from './types';
 
 type ContentSourceType = 'text' | 'pdf' | 'url';
 
@@ -23,33 +17,84 @@ interface DropdownItem {
 }
 
 export default function CreateQuizScreen() {
-  const [quizTitle, setQuizTitle] = useState('');
-  const [quizDescription, setQuizDescription] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [contentSource, setContentSource] = useState<ContentSourceType>('text');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [textContent, setTextContent] = useState('');
+  const [pdfFile, setPdfFile] = useState(null);
   const [urlContent, setUrlContent] = useState('');
-  
-  // Hover states for web platform
+  const [loading, setLoading] = useState(false);
+  const [generatedQuestions, setGeneratedQuestions] = useState<QuizQuestion[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownHovered, setDropdownHovered] = useState(false);
   const [generateButtonHovered, setGenerateButtonHovered] = useState(false);
   const [fetchButtonHovered, setFetchButtonHovered] = useState(false);
   const [pdfBoxHovered, setPdfBoxHovered] = useState(false);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-  
+
   const contentSourceOptions: DropdownItem[] = [
     { label: 'Text', value: 'text', icon: 'document-text-outline' as const },
     { label: 'PDF', value: 'pdf', icon: 'document-outline' as const },
     { label: 'Web URL', value: 'url', icon: 'globe-outline' as const }
   ];
-  
+
   const selectedOption = contentSourceOptions.find(option => option.value === contentSource);
-  
+
   const handleSelectContentSource = (item: DropdownItem) => {
     setContentSource(item.value);
     setDropdownOpen(false);
   };
-  
+
+  const handleGenerateQuiz = async () => {
+    if (contentSource === 'text' && !textContent.trim()) {
+      Alert.alert('Missing Content', 'Please enter text content to generate quiz questions.');
+      return;
+    }
+
+    // Start loading state
+    setLoading(true);
+    setGeneratedQuestions([]);
+
+    try {
+      let content = '';
+
+      // Get content based on source type
+      switch (contentSource) {
+        case 'text':
+          content = textContent;
+          break;
+        case 'url':
+          // URL content handling would go here
+          Alert.alert('Not Implemented', 'URL content source is not implemented yet.');
+          setLoading(false);
+          return;
+        case 'pdf':
+          // PDF content handling would go here
+          Alert.alert('Not Implemented', 'PDF content source is not implemented yet.');
+          setLoading(false);
+          return;
+      }
+
+      // Generate quiz using the selected AI model
+      const result = await generateQuiz(content);
+
+      if (result.success && result.questions.length > 0) {
+        setGeneratedQuestions(result.questions);
+
+        // Store generated questions
+
+        Alert.alert('Quiz Generated', 
+          `Successfully generated ${result.questions.length} questions! Check console for details.`);
+      } else {
+        Alert.alert('Generation Failed', result.error || 'Failed to generate quiz questions.');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'An error occurred while generating the quiz');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderContentSourceInput = () => {
     switch (contentSource) {
       case 'text':
@@ -57,7 +102,7 @@ export default function CreateQuizScreen() {
           <View style={common.inputContainer}>
             <Text style={common.label}>Text Content</Text>
             <TextInput
-              style={[common.input, common.textArea, styles.textEditor]}
+              style={[common.input, common.textArea, styles.textEditor as any]}
               multiline
               numberOfLines={10}
               textAlignVertical="top"
@@ -67,27 +112,27 @@ export default function CreateQuizScreen() {
             />
           </View>
         );
-        
+
       case 'pdf':
         return (
           <View style={common.inputContainer}>
             <Text style={common.label}>PDF Document</Text>
             <Pressable 
-              style={({hovered}) => [
+              style={({pressed, hovered}: ExtendedPressableStateCallbackType) => [
                 styles.pdfUploadBox,
                 hovered && Platform.OS === 'web' && {
                   borderColor: colors.primary,
                   backgroundColor: `${colors.primaryLight}DD`,
-                }
-              ]}
+                } as ViewStyle
+              ] as StyleProp<ViewStyle>}
             >
               <Ionicons name="cloud-upload-outline" size={48} color={colors.primary} />
-              <Text style={styles.uploadText}>Drag and drop PDF here</Text>
-              <Text style={styles.uploadSubtext}>or click to select from device</Text>
+              <Text style={styles.uploadText as StyleProp<TextStyle>}>Drag and drop PDF here</Text>
+              <Text style={styles.uploadSubtext as StyleProp<TextStyle>}>or click to select from device</Text>
             </Pressable>
           </View>
         );
-        
+
       case 'url':
         return (
           <View style={common.inputContainer}>
@@ -101,7 +146,7 @@ export default function CreateQuizScreen() {
               autoCapitalize="none"
             />
             {urlContent ? (
-              <Pressable style={({hovered}) => [
+              <Pressable style={({hovered}: ExtendedPressableStateCallbackType) => [
                 common.button, 
                 { alignSelf: 'flex-start', marginTop: spacing.m },
                 hovered && Platform.OS === 'web' && {
@@ -114,12 +159,12 @@ export default function CreateQuizScreen() {
             ) : null}
           </View>
         );
-        
+
       default:
         return null;
     }
   };
-  
+
   return (
     <SafeAreaView style={common.container} edges={['bottom']}>
       <View style={[common.header, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -137,29 +182,29 @@ export default function CreateQuizScreen() {
               <Text style={common.label}>Quiz Title</Text>
               <TextInput
                 style={common.input}
-                value={quizTitle}
-                onChangeText={setQuizTitle}
+                value={title}
+                onChangeText={setTitle}
                 placeholder="Enter quiz title"
               />
             </View>
-            
+
             <View style={common.inputContainer}>
               <Text style={common.label}>Description</Text>
               <TextInput
                 style={[common.input, common.textArea]}
-                value={quizDescription}
-                onChangeText={setQuizDescription}
+                value={description}
+                onChangeText={setDescription}
                 placeholder="Enter quiz description"
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
               />
             </View>
-            
+
             <View style={common.inputContainer}>
               <Text style={common.label}>Content Source</Text>
               <Pressable 
-                style={({hovered}) => [
+                style={({hovered}: ExtendedPressableStateCallbackType) => [
                   common.dropdown,
                   hovered && Platform.OS === 'web' && {
                     borderColor: colors.primary
@@ -169,7 +214,7 @@ export default function CreateQuizScreen() {
               >
                 <View style={common.dropdownSelected}>
                   <Ionicons name={selectedOption?.icon} size={20} color={colors.text.primary} />
-                  <Text style={styles.dropdownSelectedText}>{selectedOption?.label}</Text>
+                  <Text style={styles.dropdownSelectedText as StyleProp<TextStyle>}>{selectedOption?.label}</Text>
                 </View>
                 <Ionicons 
                   name={dropdownOpen ? 'chevron-up' : 'chevron-down'} 
@@ -177,19 +222,19 @@ export default function CreateQuizScreen() {
                   color={colors.text.primary} 
                 />
               </Pressable>
-              
+
               {dropdownOpen && (
                 <View style={common.dropdownMenu}>
                   {contentSourceOptions.map((item) => (
                     <Pressable 
                       key={item.value} 
-                      style={({hovered}) => [
+                      style={({hovered}: ExtendedPressableStateCallbackType) => [
                         common.dropdownItem,
                         item.value === contentSource && styles.dropdownItemSelected,
                         hovered && Platform.OS === 'web' && {
                           backgroundColor: `${colors.primary}10`
-                        }
-                      ]}
+                        } as ViewStyle
+                      ] as StyleProp<ViewStyle>}
                       onPress={() => handleSelectContentSource(item)}
                     >
                       <Ionicons 
@@ -199,8 +244,8 @@ export default function CreateQuizScreen() {
                       />
                       <Text 
                         style={[
-                          styles.dropdownItemText,
-                          item.value === contentSource && styles.dropdownItemTextSelected
+                          styles.dropdownItemText as StyleProp<TextStyle>,
+                          item.value === contentSource && styles.dropdownItemTextSelected as StyleProp<TextStyle>
                         ]}
                       >
                         {item.label}
@@ -210,18 +255,32 @@ export default function CreateQuizScreen() {
                 </View>
               )}
             </View>
-            
+
             {renderContentSourceInput()}
-            
-            <Pressable style={({hovered}) => [
-              common.button,
-              hovered && Platform.OS === 'web' && {
-                backgroundColor: `${colors.primary}E6`,
-                transform: [{scale: 1.02}]
-              }
-            ]}>
-              <Text style={common.buttonText}>Generate Quiz</Text>
+
+            <Pressable 
+              style={[common.button, styles.generateButton] as StyleProp<ViewStyle>} 
+              onPress={handleGenerateQuiz}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={common.buttonText}>Generate Quiz</Text>
+              )}
             </Pressable>
+
+            {/* Display number of generated questions if any */}
+            {generatedQuestions.length > 0 && (
+              <View style={styles.generatedResultsContainer as StyleProp<ViewStyle>}>
+                <Text style={styles.generatedResultsText as StyleProp<TextStyle>}>
+                  {generatedQuestions.length} questions generated!
+                </Text>
+                <Text style={styles.generatedResultsSubtext as StyleProp<TextStyle>}>
+                  Check the console logs for details.
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -233,20 +292,23 @@ export default function CreateQuizScreen() {
 
 const styles = StyleSheet.create({
   textEditor: {
-    minHeight: 200,
-    padding: spacing.l,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    minHeight: 150,
+    padding: spacing.m,
+    fontFamily: 'System',
   },
   pdfUploadBox: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: colors.border.medium,
+    borderStyle: 'dashed' as 'dashed',
     borderRadius: borderRadius.m,
-    padding: spacing.xxl,
+    padding: spacing.l,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryLight,
-    minHeight: 200,
+    backgroundColor: colors.surface,
+    minHeight: 120,
+  },
+  uploadIcon: {
+    marginBottom: spacing.s,
   },
   uploadText: {
     fontSize: fontSize.l,
@@ -259,6 +321,11 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: spacing.s,
   },
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   dropdownSelectedText: {
     fontSize: fontSize.m,
     marginLeft: spacing.s,
@@ -266,12 +333,40 @@ const styles = StyleSheet.create({
   dropdownItemSelected: {
     backgroundColor: colors.primaryLight,
   },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.s,
+    paddingHorizontal: spacing.m,
+  },
   dropdownItemText: {
-    fontSize: fontSize.m,
     marginLeft: spacing.s,
+    fontSize: fontSize.m,
+    color: colors.text.primary,
   },
   dropdownItemTextSelected: {
-    fontWeight: '500',
     color: colors.primary,
+    fontWeight: 'bold',
+  },
+  generateButton: {
+    marginTop: spacing.l,
+    backgroundColor: colors.primary,
+  },
+  generatedResultsContainer: {
+    marginTop: spacing.l,
+    padding: spacing.m,
+    backgroundColor: colors.success + '20' as string,
+    borderRadius: borderRadius.m,
+    alignItems: 'center',
+  },
+  generatedResultsText: {
+    fontSize: fontSize.l,
+    fontWeight: 'bold',
+    color: colors.success,
+    marginBottom: spacing.xs,
+  },
+  generatedResultsSubtext: {
+    fontSize: fontSize.s,
+    color: colors.text.secondary,
   },
 });

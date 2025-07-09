@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform, Animated } from 'react-native';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { WebSidebar } from '../components/WebSidebar';
@@ -11,6 +11,8 @@ const SIDEBAR_WIDTH = 250;
 const COLLAPSED_WIDTH = 60;
 
 export default function RootLayout() {
+  // Animation value for smooth transitions
+  const [contentMargin] = useState(new Animated.Value(COLLAPSED_WIDTH));
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
@@ -22,6 +24,15 @@ export default function RootLayout() {
   }, []);
 
   const isMobile = dimensions.width < 768;
+  
+  // Run animation when sidebar state changes
+  useEffect(() => {
+    Animated.timing(contentMargin, {
+      toValue: isMobile ? 0 : (isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH),
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [isSidebarCollapsed, isMobile]);
   
   // Handle sidebar collapsed state changes
   const handleSidebarCollapsedChange = (collapsed: boolean) => {
@@ -36,13 +47,15 @@ export default function RootLayout() {
         ) : (
           <MobileSidebar onCollapsedChange={handleSidebarCollapsedChange} />
         )}
-        <View 
+        <Animated.View 
           style={[
             styles.content,
-            Platform.OS === 'web' && {
-              position: 'absolute',
-              left: isMobile ? 0 : (isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH),
-              width: '100%'
+            Platform.OS === 'web' ? {
+              marginLeft: contentMargin,
+              width: Animated.subtract(dimensions.width, contentMargin)
+            } : {
+              // For mobile, we use full width
+              width: dimensions.width
             }
           ]}
         >
@@ -52,7 +65,7 @@ export default function RootLayout() {
               animation: 'slide_from_right',
             }}
           />
-        </View>
+        </Animated.View>
       </View>
     </SafeAreaProvider>
   );
@@ -67,8 +80,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    minHeight: '100%',
+    backgroundColor: colors.background,
   },
 });
+
+// Add web-specific styles if on web platform
+if (Platform.OS === 'web') {
+  // @ts-ignore - transition is valid in React Native Web but not in React Native types
+  styles.content.transition = 'margin-left 0.25s ease, width 0.25s ease';
+}
