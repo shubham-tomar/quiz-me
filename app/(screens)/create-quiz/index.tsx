@@ -7,13 +7,12 @@ import {
   TouchableOpacity, 
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Pressable
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { common, colors, spacing, fontSize, borderRadius } from '../../../styles';
-
-// testing
 
 type ContentSourceType = 'text' | 'pdf' | 'url';
 
@@ -30,6 +29,13 @@ export default function CreateQuizScreen() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [textContent, setTextContent] = useState('');
   const [urlContent, setUrlContent] = useState('');
+  
+  // Hover states for web platform
+  const [dropdownHovered, setDropdownHovered] = useState(false);
+  const [generateButtonHovered, setGenerateButtonHovered] = useState(false);
+  const [fetchButtonHovered, setFetchButtonHovered] = useState(false);
+  const [pdfBoxHovered, setPdfBoxHovered] = useState(false);
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
   
   const contentSourceOptions: DropdownItem[] = [
     { label: 'Text', value: 'text', icon: 'document-text-outline' as const },
@@ -66,11 +72,19 @@ export default function CreateQuizScreen() {
         return (
           <View style={common.inputContainer}>
             <Text style={common.label}>PDF Document</Text>
-            <TouchableOpacity style={styles.pdfUploadBox}>
+            <Pressable 
+              style={({hovered}) => [
+                styles.pdfUploadBox,
+                hovered && Platform.OS === 'web' && {
+                  borderColor: colors.primary,
+                  backgroundColor: `${colors.primaryLight}DD`,
+                }
+              ]}
+            >
               <Ionicons name="cloud-upload-outline" size={48} color={colors.primary} />
               <Text style={styles.uploadText}>Drag and drop PDF here</Text>
               <Text style={styles.uploadSubtext}>or click to select from device</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         );
         
@@ -87,9 +101,16 @@ export default function CreateQuizScreen() {
               autoCapitalize="none"
             />
             {urlContent ? (
-              <TouchableOpacity style={[common.button, { alignSelf: 'flex-start', marginTop: spacing.m }]}>
+              <Pressable style={({hovered}) => [
+                common.button, 
+                { alignSelf: 'flex-start', marginTop: spacing.m },
+                hovered && Platform.OS === 'web' && {
+                  backgroundColor: `${colors.primary}E6`,
+                  transform: [{scale: 1.02}]
+                }
+              ]}>
                 <Text style={common.buttonText}>Fetch Content</Text>
-              </TouchableOpacity>
+              </Pressable>
             ) : null}
           </View>
         );
@@ -137,8 +158,13 @@ export default function CreateQuizScreen() {
             
             <View style={common.inputContainer}>
               <Text style={common.label}>Content Source</Text>
-              <TouchableOpacity 
-                style={common.dropdown}
+              <Pressable 
+                style={({hovered}) => [
+                  common.dropdown,
+                  hovered && Platform.OS === 'web' && {
+                    borderColor: colors.primary
+                  }
+                ]}
                 onPress={() => setDropdownOpen(!dropdownOpen)}
               >
                 <View style={common.dropdownSelected}>
@@ -150,16 +176,19 @@ export default function CreateQuizScreen() {
                   size={20} 
                   color={colors.text.primary} 
                 />
-              </TouchableOpacity>
+              </Pressable>
               
               {dropdownOpen && (
                 <View style={common.dropdownMenu}>
                   {contentSourceOptions.map((item) => (
-                    <TouchableOpacity 
+                    <Pressable 
                       key={item.value} 
-                      style={[
+                      style={({hovered}) => [
                         common.dropdownItem,
-                        item.value === contentSource && styles.dropdownItemSelected
+                        item.value === contentSource && styles.dropdownItemSelected,
+                        hovered && Platform.OS === 'web' && {
+                          backgroundColor: `${colors.primary}10`
+                        }
                       ]}
                       onPress={() => handleSelectContentSource(item)}
                     >
@@ -176,7 +205,7 @@ export default function CreateQuizScreen() {
                       >
                         {item.label}
                       </Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                 </View>
               )}
@@ -184,15 +213,23 @@ export default function CreateQuizScreen() {
             
             {renderContentSourceInput()}
             
-            <TouchableOpacity style={common.button}>
+            <Pressable style={({hovered}) => [
+              common.button,
+              hovered && Platform.OS === 'web' && {
+                backgroundColor: `${colors.primary}E6`,
+                transform: [{scale: 1.02}]
+              }
+            ]}>
               <Text style={common.buttonText}>Generate Quiz</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   textEditor: {
