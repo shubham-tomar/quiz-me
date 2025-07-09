@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { common, colors } from '../styles';
@@ -12,7 +12,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={common.container}>
+    <SafeAreaView style={common.container} edges={Platform.OS === 'web' ? [] : ['top', 'bottom']}>
       <View style={[common.contentContainer, styles.centeredContent]}>
         <Text style={common.title}>Quiz Me</Text>
         <Text style={common.subtitle}>Create and take quizzes on any topic</Text>

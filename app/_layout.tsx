@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { WebSidebar } from '../components/WebSidebar';
@@ -31,18 +31,18 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        {Platform.OS === 'web' ? (
-          <WebSidebar onCollapsedChange={handleSidebarCollapsedChange} />
-        ) : (
+        {isMobile ? (
           <MobileSidebar onCollapsedChange={handleSidebarCollapsedChange} />
+        ) : (
+          <WebSidebar onCollapsedChange={handleSidebarCollapsedChange} />
         )}
         <View 
           style={[
             styles.content,
-            Platform.OS === 'web' && {
+            !isMobile && {
               position: 'absolute',
-              left: isMobile ? 0 : (isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH),
-              width: '100%'
+              left: isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH,
+              width: `calc(100% - ${isSidebarCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH}px)`
             }
           ]}
         >
@@ -63,12 +63,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: colors.background,
-    position: 'relative',
   },
   content: {
     flex: 1,
-    right: 0,
-    top: 0,
-    bottom: 0,
   },
 });

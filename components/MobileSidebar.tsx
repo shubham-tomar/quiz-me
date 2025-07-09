@@ -321,15 +321,15 @@ export function MobileSidebar({ onCollapsedChange }: MobileSidebarProps) {
   // Only render the toggle button when collapsed
   if (isCollapsed) {
     return (
-      <Pressable 
-        onPress={toggleSidebar} 
-        style={styles.toggleButtonContainer}
-        hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
-      >
-        <View style={styles.toggleButton}>
+      <View style={[styles.toggleButtonContainer, { paddingTop: insets.top }]}>
+        <Pressable 
+          onPress={toggleSidebar} 
+          style={styles.toggleButton}
+          hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
+        >
           <Ionicons name="menu" size={24} color={colors.text.primary} />
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     );
   }
 
@@ -430,9 +430,12 @@ const styles = StyleSheet.create({
   },
   toggleButtonContainer: {
     position: 'absolute',
-    top: 10,
-    left: 10,
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 100,
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
   },
   toggleButton: {
     width: 40,
@@ -441,11 +444,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   header: {
     height: 60,

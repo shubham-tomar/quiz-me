@@ -121,7 +121,7 @@ export default function CreateQuizScreen() {
   };
   
   return (
-    <SafeAreaView style={common.container} edges={['bottom']}>
+    <SafeAreaView style={common.container} edges={Platform.OS === 'web' ? ['bottom'] : ['top', 'bottom']}>
       <View style={[common.header, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={common.headerTitle}>Create Quiz</Text>
       </View>
