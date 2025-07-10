@@ -7,6 +7,7 @@ import { common } from '../../../styles/common';
 import { colors, spacing, fontSize, borderRadius } from '../../../styles';
 import { generateQuiz, QuizQuestion } from '../../src/quiz-gen';
 import { ExtendedPressableStateCallbackType } from './types';
+import { useRouter } from 'expo-router';
 
 type ContentSourceType = 'text' | 'pdf' | 'url';
 
@@ -45,51 +46,45 @@ export default function CreateQuizScreen() {
     setDropdownOpen(false);
   };
 
+  const router = useRouter();
+
   const handleGenerateQuiz = async () => {
     if (contentSource === 'text' && !textContent.trim()) {
       Alert.alert('Missing Content', 'Please enter text content to generate quiz questions.');
       return;
     }
 
-    // Start loading state
     setLoading(true);
     setGeneratedQuestions([]);
-
+    
     try {
-      let content = '';
-
-      // Get content based on source type
-      switch (contentSource) {
-        case 'text':
-          content = textContent;
-          break;
-        case 'url':
-          // URL content handling would go here
-          Alert.alert('Not Implemented', 'URL content source is not implemented yet.');
-          setLoading(false);
-          return;
-        case 'pdf':
-          // PDF content handling would go here
-          Alert.alert('Not Implemented', 'PDF content source is not implemented yet.');
-          setLoading(false);
-          return;
-      }
-
-      // Generate quiz using the selected AI model
-      const result = await generateQuiz(content);
-
-      if (result.success && result.questions.length > 0) {
-        setGeneratedQuestions(result.questions);
-
-        // Store generated questions
-
-        Alert.alert('Quiz Generated', 
-          `Successfully generated ${result.questions.length} questions! Check console for details.`);
+      let result;
+      if (contentSource === 'text') {
+        result = await generateQuiz(textContent);
+      } else if (contentSource === 'pdf' && pdfFile) {
+        // For PDF content - not implemented yet
+        Alert.alert('Not Implemented', 'PDF content source is not fully implemented yet.');
+        setLoading(false);
+        return;
+      } else if (contentSource === 'url' && urlContent) {
+        // For URL content - not implemented yet
+        Alert.alert('Not Implemented', 'URL content source is not fully implemented yet.');
+        setLoading(false);
+        return;
       } else {
-        Alert.alert('Generation Failed', result.error || 'Failed to generate quiz questions.');
+        Alert.alert('Error', 'Please provide content to generate quiz questions.');
+        setLoading(false);
+        return;
       }
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'An error occurred while generating the quiz');
+
+      if (result.success && result.questions && result.questions.length > 0) {
+        setGeneratedQuestions(result.questions);
+        Alert.alert('Quiz Generated', `Successfully generated ${result.questions.length} questions! Click 'Take Quiz' to begin.`);
+      } else {
+        Alert.alert('Error', result.error || 'Failed to generate quiz questions. Please try again.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -270,6 +265,21 @@ export default function CreateQuizScreen() {
               )}
             </Pressable>
 
+            {/* Display Take Quiz button when questions are generated */}
+            {generatedQuestions.length > 0 && (
+              <Pressable 
+                style={[common.button, styles.takeQuizButton] as StyleProp<ViewStyle>}
+                onPress={() => router.push({
+                  pathname: '/quiz',
+                  params: {
+                    questions: encodeURIComponent(JSON.stringify(generatedQuestions))
+                  }
+                })}
+              >
+                <Text style={common.buttonText}>Take Quiz</Text>
+              </Pressable>
+            )}
+
             {/* Display number of generated questions if any */}
             {generatedQuestions.length > 0 && (
               <View style={styles.generatedResultsContainer as StyleProp<ViewStyle>}>
@@ -368,5 +378,13 @@ const styles = StyleSheet.create({
   generatedResultsSubtext: {
     fontSize: fontSize.s,
     color: colors.text.secondary,
+  },
+  disabledButton: {
+    opacity: 0.7,
+    backgroundColor: colors.textMedium,
+  },
+  takeQuizButton: {
+    marginTop: spacing.m,
+    backgroundColor: colors.secondary,
   },
 });
