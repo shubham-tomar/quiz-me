@@ -15,10 +15,11 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, fontSize, borderRadius } from '../../styles';
 import { useAuth } from '../../contexts/AuthContext';
+import { getSession } from '../../services/supabase/auth';
 import { supabase } from '../../services/supabase/client';
 
 export default function ProfileScreen() {
-  const { user, session } = useAuth();
+  const { user, session, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
@@ -35,57 +36,62 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       
-      if (!user?.id) return;
+      if (!user) return;
       
-      // Get user profile from profiles table
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Get profile data from user metadata
+      const metadata = getUserMetadata();
+      setFullName(metadata.full_name || '');
+      setUsername(metadata.username || '');
       
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      
-      if (data) {
-        setFullName(data.full_name || '');
-        setUsername(data.username || '');
-      } else {
-        // If profile doesn't exist yet, use email username as default
-        setUsername(user.email?.split('@')[0] || '');
+      // If no username is set, try to derive it from email
+      if (!metadata.username && user.email) {
+        const emailUsername = user.email.split('@')[0] || '';
+        setUsername(emailUsername);
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to load profile');
+      console.error('Error loading profile:', error.message);
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Get user metadata from Supabase user object
+  const getUserMetadata = () => {
+    if (!user) return { full_name: '', username: '' };
+    
+    // Access user metadata from the user object
+    const metadata = user.user_metadata || {};
+    return {
+      full_name: metadata.full_name || '',
+      username: metadata.username || ''
+    };
   };
   
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
       
-      if (!user?.id) return;
+      if (!user) return;
       
-      // Update or create profile
-      const updates = {
-        id: user.id,
-        full_name: fullName,
-        username,
-        updated_at: new Date(),
-      };
-      
-      const { error } = await supabase
-        .from('profiles')
-        .upsert(updates, {
-          onConflict: 'id'
-        });
+      // Update user metadata with profile information
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName,
+          username: username,
+          updated_at: new Date().toISOString()
+        }
+      });
       
       if (error) throw error;
       
+      // Refresh user session to get updated metadata
+      if (refreshUser) {
+        await refreshUser();
+      }
+      
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error: any) {
+      console.error('Profile update error:', error);
       Alert.alert('Error', error.message || 'Failed to update profile');
     } finally {
       setSaving(false);

@@ -8,6 +8,7 @@ type AuthContextType = {
   user: any | null;
   loading: boolean;
   error: string | null;
+  refreshUser?: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -72,8 +73,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  const refreshUser = async () => {
+    try {
+      setState(prev => ({ ...prev, loading: true }));
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        setState(prev => ({ ...prev, error: error.message, loading: false }));
+        return;
+      }
+      
+      setState({
+        session,
+        user: session?.user ?? null,
+        loading: false,
+        error: null,
+        refreshUser
+      });
+    } catch (error: any) {
+      setState(prev => ({ 
+        ...prev, 
+        error: error?.message || 'Failed to refresh session', 
+        loading: false 
+      }));
+    }
+  };
+
+  const contextValue = {
+    ...state,
+    refreshUser
+  };
+
   return (
-    <AuthContext.Provider value={state}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
