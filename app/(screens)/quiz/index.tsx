@@ -6,31 +6,77 @@ import { colors, spacing, fontSize, borderRadius } from '../../../styles';
 import { common } from '../../../styles/common';
 import { QuizQuestion } from '../../src/quiz-gen';
 import { ExtendedPressableStateCallbackType } from '../create-quiz/types';
+import { getQuizById, getQuestionsForQuiz, saveQuizAttempt, updateUserAnswers } from '../../../services/supabase/quiz';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function QuizScreen() {
   const router = useRouter();
-  const { questions: questionsParam } = useLocalSearchParams();
+  const { questions: questionsParam, id: quizId } = useLocalSearchParams();
+  const { user } = useAuth();
   
   // State
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [questions, setQuestions] = useState<(QuizQuestion & { id?: string })[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [quizComplete, setQuizComplete] = useState(false);
+  const [quizData, setQuizData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialize questions from params
+  // Initialize questions from params or load from Supabase by ID
   useEffect(() => {
-    try {
-      if (questionsParam) {
-        const parsedQuestions = JSON.parse(decodeURIComponent(questionsParam as string));
-        setQuestions(parsedQuestions);
+    async function loadQuiz() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        if (quizId) {
+          // Load quiz from Supabase
+          const { data: quiz, error: quizError } = await getQuizById(quizId as string);
+          
+          if (quizError || !quiz) {
+            throw new Error(quizError?.message || 'Failed to load quiz');
+          }
+          
+          setQuizData(quiz);
+          
+          // Load questions for this quiz
+          const { data: quizQuestions, error: questionsError } = await getQuestionsForQuiz(quizId as string);
+          
+          if (questionsError) {
+            throw new Error(questionsError.message || 'Failed to load quiz questions');
+          }
+          
+          if (!quizQuestions || quizQuestions.length === 0) {
+            throw new Error('No questions found for this quiz');
+          }
+          
+          // Convert DB questions to QuizQuestion format and store original question IDs
+          const formattedQuestions: (QuizQuestion & { id?: string })[] = quizQuestions.map(q => ({
+            id: q.id,
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correct_ans
+          }));
+          
+          setQuestions(formattedQuestions);
+        } else if (questionsParam) {
+          // Load questions from the URL parameter (existing functionality)
+          const parsedQuestions = JSON.parse(decodeURIComponent(questionsParam as string));
+          setQuestions(parsedQuestions);
+        } else {
+          throw new Error('No quiz ID or questions provided');
+        }
+      } catch (err: any) {
+        console.error('Error loading quiz:', err);
+        setError(err.message || 'Failed to load questions');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load questions');
-    } finally {
-      setIsLoading(false);
     }
-  }, [questionsParam]);
+
+    loadQuiz();
+  }, [quizId, questionsParam]);
 
   // Current question
   const currentQuestion = questions[currentQuestionIndex];
@@ -43,20 +89,52 @@ export default function QuizScreen() {
   };
 
   // Handle navigation
-  const goToNextQuestion = () => {
+  const goToNextQuestion = async () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setQuizComplete(true);
-      // Calculate score and navigate to results
       const score = calculateScore();
+      
+      try {
+        // Save quiz attempt and user answers to Supabase if it's a saved quiz
+        if (quizId && user) {
+          // 1. Save the overall quiz attempt
+          await saveQuizAttempt(quizId as string, score);
+          
+          // 2. Save the user's answers for each question
+          const answersToUpdate = questions.map((question, index) => ({
+            id: question.id || '',
+            user_ans: selectedOptions[index]
+          })).filter(answer => answer.id && answer.user_ans !== undefined);
+          
+          if (answersToUpdate.length > 0) {
+            await updateUserAnswers(quizId as string, answersToUpdate);
+          }
+        }
+      } catch (err) {
+        // Continue even if saving fails - no need to alert user
+      }
+      
+      // Calculate raw correct answers for display purposes
+      let correctAnswers = 0;
+      questions.forEach((question, index) => {
+        if (selectedOptions[index] === question.correctAnswer) {
+          correctAnswers++;
+        }
+      });
+      
+      // Navigate to results
       router.push({
         pathname: '/results',
         params: {
-          score: score.toString(),
+          score: score.toString(), // score is now a percentage
+          correctAnswers: correctAnswers.toString(),
           total: questions.length.toString(),
           answers: JSON.stringify(selectedOptions),
-          questions: questionsParam as string
+          questions: questionsParam ? (questionsParam as string) : undefined,
+          quizId: quizId ? (quizId as string) : undefined,
+          quizTitle: quizData?.title || 'Quiz'
         }
       });
     }
@@ -68,15 +146,16 @@ export default function QuizScreen() {
     }
   };
 
-  // Calculate score
+  // Calculate score as a percentage
   const calculateScore = () => {
-    let score = 0;
+    let correctAnswers = 0;
     questions.forEach((question, index) => {
       if (selectedOptions[index] === question.correctAnswer) {
-        score++;
+        correctAnswers++;
       }
     });
-    return score;
+    // Calculate percentage and round to whole number
+    return Math.round((correctAnswers / questions.length) * 100);
   };
 
   if (isLoading) {
@@ -88,10 +167,10 @@ export default function QuizScreen() {
     );
   }
 
-  if (!currentQuestion) {
+  if (error || !currentQuestion) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>No questions available</Text>
+        <Text style={styles.errorText}>{error || 'No questions available'}</Text>
         <Pressable 
           style={styles.backButton}
           onPress={() => router.back()}
