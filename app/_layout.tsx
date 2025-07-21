@@ -1,16 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, Animated } from 'react-native';
-import { Stack } from 'expo-router';
+import { View, StyleSheet, Dimensions, Platform, Animated, ActivityIndicator } from 'react-native';
+import { Stack, useSegments, useRouter, SplashScreen } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { WebSidebar } from '../components/WebSidebar';
 import { MobileSidebar } from '../components/MobileSidebar';
 import { colors } from '../styles';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
 // Constants from Sidebar component for consistency
 const SIDEBAR_WIDTH = 250;
 const COLLAPSED_WIDTH = 60;
 
-export default function RootLayout() {
+// Prevent the splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
+
+// This component handles navigation based on auth state
+function AuthNavigation({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useAuth();
+  const segments = useSegments() as string[];
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === '(screens)' && segments.length > 1 && segments[1] === '(auth)';
+
+    if (!session && !inAuthGroup) {
+      // Redirect to login if not authenticated and not in auth group
+      router.replace('/(screens)/(auth)/login');
+    } else if (session && inAuthGroup) {
+      // Redirect to home if authenticated and in auth group
+      router.replace('/');
+    }
+
+    // Hide splash screen once navigation is determined
+    SplashScreen.hideAsync();
+  }, [session, segments, loading]);
+
+  // Show loading indicator while determining auth state
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+// Content component that handles sidebar and layout
+function AppContent() {
+  const { session } = useAuth();
   // Animation value for smooth transitions
   const [contentMargin] = useState(new Animated.Value(COLLAPSED_WIDTH));
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
@@ -42,19 +83,19 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        {Platform.OS === 'web' ? (
+        {session && Platform.OS === 'web' ? (
           <WebSidebar onCollapsedChange={handleSidebarCollapsedChange} />
-        ) : (
+        ) : session && (
           <MobileSidebar onCollapsedChange={handleSidebarCollapsedChange} />
         )}
         <Animated.View 
           style={[
             styles.content,
-            Platform.OS === 'web' ? {
+            Platform.OS === 'web' && session ? {
               marginLeft: contentMargin,
               width: Animated.subtract(dimensions.width, contentMargin)
             } : {
-              // For mobile, we use full width
+              // For mobile or unauthenticated, we use full width
               width: dimensions.width
             }
           ]}
@@ -68,6 +109,16 @@ export default function RootLayout() {
         </Animated.View>
       </View>
     </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <AuthNavigation>
+        <AppContent />
+      </AuthNavigation>
+    </AuthProvider>
   );
 }
 

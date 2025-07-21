@@ -9,12 +9,15 @@ import {
   ViewStyle,
   TextStyle,
   Dimensions,
-  Pressable
+  Pressable,
+  Alert
 } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, fontSize, borderRadius } from '../styles';
+import { useAuth } from '../contexts/AuthContext';
+import { signOut } from '../services/supabase/auth';
 
 const SIDEBAR_WIDTH = 250;
 const COLLAPSED_WIDTH = 60;
@@ -133,48 +136,28 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
+  const { user } = useAuth();
+  
+  // Animated values
+  const width = React.useRef(new Animated.Value(COLLAPSED_WIDTH)).current;
+  const [sidebarWidth, setSidebarWidth] = useState(COLLAPSED_WIDTH);
   const insets = useSafeAreaInsets();
   
-  // Initialize animation value to 1 (collapsed) since we start collapsed
-  const widthAnim = React.useRef(new Animated.Value(1)).current;
-  
-  // For responsive design
-  const [dimensions, setDimensions] = useState(Dimensions.get('window'));
-  const { width: screenWidth } = Dimensions.get('window');
-  const isMobile = screenWidth < 768;
-  
-  // Notify parent of initial collapsed state on mount
-  useEffect(() => {
-    if (onCollapsedChange) {
-      onCollapsedChange(isCollapsed);
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      router.replace('/login');
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Failed to logout');
     }
-    
-    // Update dimensions when screen size changes
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      setDimensions(window);
-    });
-    
-    return () => subscription.remove();
-  }, []);
-
-  // Initialize expanded state based on defaultExpanded
-  useEffect(() => {
-    const initialExpandedState: {[key: string]: boolean} = {};
-    
-    navStructure.forEach(item => {
-      if (item.type === 'nested' && item.defaultExpanded) {
-        initialExpandedState[item.id] = true;
-      }
-    });
-    
-    setExpandedItems(initialExpandedState);
-  }, []);
+  };
 
   const toggleSidebar = () => {
     const newCollapsedState = !isCollapsed;
     
-    Animated.timing(widthAnim, {
-      toValue: newCollapsedState ? 1 : 0,
+    Animated.timing(width, {
+      toValue: newCollapsedState ? COLLAPSED_WIDTH : SIDEBAR_WIDTH,
       duration: ANIM_DURATION,
       useNativeDriver: false,
     }).start();
@@ -328,9 +311,9 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
   };
 
   // Calculate sidebar width based on animation value
-  const sidebarWidth = widthAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [SIDEBAR_WIDTH, COLLAPSED_WIDTH],
+  const sidebarWidthAnim = width.interpolate({
+    inputRange: [COLLAPSED_WIDTH, SIDEBAR_WIDTH],
+    outputRange: [COLLAPSED_WIDTH, SIDEBAR_WIDTH],
   });
   
   // Notify parent of initial collapsed state on mount
@@ -345,12 +328,12 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
       style={[
         styles.container,
         {
-          width: sidebarWidth,
+          width: sidebarWidthAnim,
           paddingTop: insets.top,
           paddingBottom: insets.bottom,
           paddingLeft: insets.left,
         },
-        isMobile && styles.mobileSidebar,
+        isCollapsed && styles.mobileSidebar,
       ]}
       // Add testID for debugging
       testID="web-sidebar"
@@ -389,14 +372,26 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
       
       {!isCollapsed && (
         <View style={styles.footer}>
-          <Pressable style={styles.profileButton}>
+          <Pressable 
+            style={styles.profileButton}
+            onPress={() => router.push('/(screens)/profile')}
+          >
             <View style={styles.profileAvatar}>
-              <Text style={styles.profileInitial}>U</Text>
+              <Text style={styles.profileInitial}>{user?.email?.[0].toUpperCase() || 'U'}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName} numberOfLines={1}>User Name</Text>
-              <Text style={styles.profileEmail} numberOfLines={1}>user@example.com</Text>
+              <Text style={styles.profileName} numberOfLines={1}>{user?.email?.split('@')[0] || 'User'}</Text>
+              <Text style={styles.profileEmail} numberOfLines={1}>{user?.email || 'user@example.com'}</Text>
             </View>
+            <Ionicons name="chevron-forward-outline" size={16} color={colors.text.secondary} />
+          </Pressable>
+          
+          <Pressable 
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={20} color={colors.text.primary} />
+            <Text style={styles.logoutText}>Logout</Text>
           </Pressable>
         </View>
       )}
@@ -544,18 +539,21 @@ const styles = StyleSheet.create({
   profileButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: spacing.s,
+    borderRadius: borderRadius.m,
+    marginBottom: spacing.s,
   },
   profileAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileInitial: {
     color: '#fff',
-    fontSize: fontSize.m,
+    fontSize: fontSize.l,
     fontWeight: '500',
   },
   profileInfo: {
@@ -570,5 +568,19 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: fontSize.xs,
     color: colors.text.secondary,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.s,
+    borderRadius: borderRadius.m,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  logoutText: {
+    marginLeft: spacing.s,
+    fontSize: fontSize.s,
+    color: colors.text.primary,
   },
 });
