@@ -8,6 +8,8 @@ import { colors, spacing, fontSize, borderRadius } from '../../../styles';
 import { generateQuiz, QuizQuestion } from '../../src/quiz-gen';
 import { ExtendedPressableStateCallbackType } from './types';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../../contexts/AuthContext';
+import { createQuiz, addQuestionsToQuiz } from '../../../services/supabase/quiz';
 
 type ContentSourceType = 'text' | 'pdf' | 'url';
 
@@ -32,6 +34,8 @@ export default function CreateQuizScreen() {
   const [fetchButtonHovered, setFetchButtonHovered] = useState(false);
   const [pdfBoxHovered, setPdfBoxHovered] = useState(false);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [savedQuizId, setSavedQuizId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const contentSourceOptions: DropdownItem[] = [
     { label: 'Text', value: 'text', icon: 'document-text-outline' as const },
@@ -49,8 +53,19 @@ export default function CreateQuizScreen() {
   const router = useRouter();
 
   const handleGenerateQuiz = async () => {
+    if (!title.trim()) {
+      Alert.alert('Missing Title', 'Please enter a title for your quiz.');
+      return;
+    }
+
     if (contentSource === 'text' && !textContent.trim()) {
       Alert.alert('Missing Content', 'Please enter text content to generate quiz questions.');
+      return;
+    }
+
+    if (!user) {
+      Alert.alert('Authentication Required', 'Please log in to create quizzes.');
+      router.push('/login');
       return;
     }
 
@@ -58,9 +73,13 @@ export default function CreateQuizScreen() {
     setGeneratedQuestions([]);
     
     try {
+      // Generate the quiz questions
       let result;
+      let sourceContent = '';
+      
       if (contentSource === 'text') {
         result = await generateQuiz(textContent);
+        sourceContent = textContent;
       } else if (contentSource === 'pdf' && pdfFile) {
         // For PDF content - not implemented yet
         Alert.alert('Not Implemented', 'PDF content source is not fully implemented yet.');
@@ -78,13 +97,46 @@ export default function CreateQuizScreen() {
       }
 
       if (result.success && result.questions && result.questions.length > 0) {
+        // Save the quiz to the database
+        const source = contentSource === 'text' ? 'Text Input' : 
+                     contentSource === 'pdf' ? 'PDF Document' : 
+                     contentSource === 'url' ? urlContent : '';
+
+        const { data: quizData, error: quizError } = await createQuiz(title, source);
+        
+        if (quizError || !quizData) {
+          console.error('Error creating quiz:', quizError);
+          Alert.alert('Error', 'Failed to save quiz to database.');
+          setGeneratedQuestions(result.questions);
+          setLoading(false);
+          return;
+        }
+
+        // Format questions for database
+        const questionsForDb = result.questions.map(q => ({
+          question: q.question,
+          options: q.options,
+          correct_ans: q.correctAnswer,
+          explanation: ''
+        }));
+
+        // Save the questions to the database
+        const { error: questionsError } = await addQuestionsToQuiz(quizData.id, questionsForDb);
+        
+        if (questionsError) {
+          console.error('Error adding questions:', questionsError);
+          Alert.alert('Warning', 'Quiz created but failed to save some questions.');
+        }
+
+        setSavedQuizId(quizData.id);
         setGeneratedQuestions(result.questions);
-        Alert.alert('Quiz Generated', `Successfully generated ${result.questions.length} questions! Click 'Take Quiz' to begin.`);
+        Alert.alert('Quiz Generated', `Successfully generated and saved ${result.questions.length} questions! Click 'Take Quiz' to begin.`);
       } else {
         Alert.alert('Error', result.error || 'Failed to generate quiz questions. Please try again.');
       }
-    } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } catch (error: any) {
+      console.error('Error generating quiz:', error);
+      Alert.alert('Error', error?.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -269,12 +321,25 @@ export default function CreateQuizScreen() {
             {generatedQuestions.length > 0 && (
               <Pressable 
                 style={[common.button, styles.takeQuizButton] as StyleProp<ViewStyle>}
-                onPress={() => router.push({
-                  pathname: '/quiz',
-                  params: {
-                    questions: encodeURIComponent(JSON.stringify(generatedQuestions))
+                onPress={() => {
+                  if (savedQuizId) {
+                    // If quiz was saved, navigate to it by ID
+                    router.push({
+                      pathname: '/quiz',
+                      params: {
+                        id: savedQuizId
+                      }
+                    });
+                  } else {
+                    // Fallback to the old method if saving failed
+                    router.push({
+                      pathname: '/quiz',
+                      params: {
+                        questions: encodeURIComponent(JSON.stringify(generatedQuestions))
+                      }
+                    });
                   }
-                })}
+                }}
               >
                 <Text style={common.buttonText}>Take Quiz</Text>
               </Pressable>

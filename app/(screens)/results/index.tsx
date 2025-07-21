@@ -9,11 +9,11 @@ import { ExtendedPressableStateCallbackType } from '../create-quiz/types';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { score, total, answers, questions: questionsParam } = useLocalSearchParams();
-  
+  const { score, correctAnswers, total, answers, questions: questionsParam } = useLocalSearchParams();
+
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
-  
+
   useEffect(() => {
     try {
       if (questionsParam && answers) {
@@ -27,9 +27,9 @@ export default function ResultsScreen() {
     }
   }, [questionsParam, answers]);
 
-  // Calculate percentage
-  const scorePercentage = Math.round((Number(score) / Number(total)) * 100);
-  
+  // Score is now directly the percentage
+  const scorePercentage = Number(score);
+
   // Get message based on score
   const getFeedbackMessage = () => {
     if (scorePercentage >= 90) return "Outstanding! You've mastered this content!";
@@ -44,51 +44,51 @@ export default function ResultsScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.scoreCard}>
           <Text style={styles.title}>Quiz Results</Text>
-          
+
           <View style={styles.scoreCircle}>
             <Text style={styles.scorePercentage}>{scorePercentage}%</Text>
           </View>
-          
+
           <Text style={styles.scoreText}>
-            You scored {score} out of {total}
+            You scored {correctAnswers} out of {total}
           </Text>
-          
+
           <Text style={styles.feedbackText}>
             {getFeedbackMessage()}
           </Text>
         </View>
 
         <Text style={styles.reviewTitle}>Review Your Answers</Text>
-        
+
         {questions.map((question, index) => (
           <View key={index} style={styles.questionReview}>
             <Text style={styles.questionNumber}>Question {index + 1}</Text>
             <Text style={styles.questionText}>{question.question}</Text>
-            
+
             <View style={styles.optionsReview}>
               {question.options.map((option, optIndex) => (
-                <View 
+                <View
                   key={optIndex}
                   style={[
                     styles.optionItem,
-                    userAnswers[index] === optIndex && 
-                      (optIndex === question.correctAnswer ? styles.correctSelected : styles.incorrectSelected),
+                    userAnswers[index] === optIndex &&
+                    (optIndex === question.correctAnswer ? styles.correctSelected : styles.incorrectSelected),
                     optIndex === question.correctAnswer && styles.correctOption
                   ]}
                 >
                   <Text style={[
                     styles.optionText,
-                    userAnswers[index] === optIndex && 
-                      (optIndex === question.correctAnswer ? styles.correctSelectedText : styles.incorrectSelectedText),
+                    userAnswers[index] === optIndex &&
+                    (optIndex === question.correctAnswer ? styles.correctSelectedText : styles.incorrectSelectedText),
                     optIndex === question.correctAnswer && styles.correctOptionText
                   ]}>
                     {option}
                   </Text>
-                  
+
                   {optIndex === question.correctAnswer && (
                     <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.icon} />
                   )}
-                  
+
                   {userAnswers[index] === optIndex && optIndex !== question.correctAnswer && (
                     <Ionicons name="close-circle" size={20} color={colors.error} style={styles.icon} />
                   )}
@@ -97,24 +97,24 @@ export default function ResultsScreen() {
             </View>
           </View>
         ))}
-        
+
         <View style={styles.buttonContainer}>
-          <Pressable 
-            style={({hovered}: ExtendedPressableStateCallbackType) => [
+          <Pressable
+            style={({ hovered }: ExtendedPressableStateCallbackType) => [
               styles.button,
               hovered && Platform.OS === 'web' && styles.buttonHovered
-            ]} 
+            ]}
             onPress={() => router.push('/')}
           >
             <Text style={styles.buttonText}>Back to Home</Text>
           </Pressable>
-          
-          <Pressable 
-            style={({hovered}: ExtendedPressableStateCallbackType) => [
+
+          <Pressable
+            style={({ hovered }: ExtendedPressableStateCallbackType) => [
               styles.button,
               styles.primaryButton,
               hovered && Platform.OS === 'web' && styles.primaryButtonHovered
-            ]} 
+            ]}
             onPress={() => router.push('/create-quiz')}
           >
             <Text style={[styles.buttonText, styles.primaryButtonText]}>Create New Quiz</Text>
