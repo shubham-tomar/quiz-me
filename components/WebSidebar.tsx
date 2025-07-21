@@ -10,6 +10,7 @@ import {
   TextStyle,
   Dimensions,
   Pressable,
+  PressableStateCallbackType,
   Alert
 } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
@@ -25,10 +26,11 @@ const ANIM_DURATION = 250;
 
 // Define types for our navigation items
 type NavItemType = 'link' | 'section' | 'nested';
+type IoniconsName = keyof typeof Ionicons.glyphMap;
 
 interface NavItemBase {
   type: NavItemType;
-  icon: string;
+  icon: IoniconsName;
   label: string;
   id: string;
 }
@@ -113,7 +115,7 @@ const navStructure: NavItem[] = [
     id: 'settings_section',
     type: 'section',
     label: 'Settings',
-    icon: '',
+    icon: 'settings-outline' as IoniconsName,
   },
   {
     id: 'settings',
@@ -188,12 +190,12 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
         return (
           <Pressable
             key={item.id}
-            style={({hovered}) => [
+            style={(state: PressableStateCallbackType) => [
               styles.navItem,
               isPathActive(item.path) && styles.activeNavItem,
-              hovered && Platform.OS === 'web' && styles.navItemHovered
+              state.pressed && styles.navItemHovered
             ]}
-            onPress={() => router.push(item.path as any)}
+            onPress={() => router.push(item.path)}
           >
               <View style={styles.iconContainer}>
                 <Ionicons
@@ -234,10 +236,10 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
       return (
         <React.Fragment key={item.id}>
           <Pressable
-            style={({hovered}) => [
+            style={(state: PressableStateCallbackType) => [
               styles.navItem,
               item.children.some(child => isPathActive(child.path)) && styles.activeNavItem,
-              hovered && Platform.OS === 'web' && styles.navItemHovered
+              state.pressed && styles.navItemHovered
             ]}
             onPress={() => toggleNestedItem(item.id)}
           >
@@ -278,16 +280,16 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
                 {item.children.map((child) => (
                   <Pressable
                     key={child.id}
-                    style={({hovered}) => [
+                    style={(state: PressableStateCallbackType) => [
                       styles.nestedItem,
                       isPathActive(child.path) && styles.activeNavItem,
-                      hovered && Platform.OS === 'web' && styles.navItemHovered
+                      state.pressed && styles.navItemHovered
                     ]}
-                    onPress={() => router.push(child.path as any)}
+                    onPress={() => router.push(child.path)}
                   >
                     <View style={styles.nestedIconContainer}>
                       <Ionicons
-                        name={child.icon as any}
+                        name={child.icon}
                         size={18}
                         color={isPathActive(child.path) ? colors.primary : colors.text.secondary}
                       />
@@ -347,9 +349,9 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
         )}
         <Pressable 
           onPress={toggleSidebar} 
-          style={({hovered}) => [
+          style={(state: PressableStateCallbackType) => [
             styles.toggleButton,
-            hovered && Platform.OS === 'web' && styles.toggleButtonHovered
+            state.pressed && styles.toggleButtonHovered
           ]}
           hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
         >
@@ -380,7 +382,7 @@ export function WebSidebar({ onCollapsedChange }: WebSidebarProps) {
               <Text style={styles.profileInitial}>{user?.email?.[0].toUpperCase() || 'U'}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName} numberOfLines={1}>{user?.email?.split('@')[0] || 'User'}</Text>
+              <Text style={styles.profileName} numberOfLines={1}>{user?.user_metadata?.full_name || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}</Text>
               <Text style={styles.profileEmail} numberOfLines={1}>{user?.email || 'user@example.com'}</Text>
             </View>
             <Ionicons name="chevron-forward-outline" size={16} color={colors.text.secondary} />
