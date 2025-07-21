@@ -7,12 +7,15 @@ import {
   ScrollView,
   TouchableOpacity,
   Pressable,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, fontSize, borderRadius } from '../styles';
+import { useAuth } from '../contexts/AuthContext';
+import { signOut } from '../services/supabase/auth';
 
 const SIDEBAR_WIDTH = 250;
 const ANIM_DURATION = 250;
@@ -126,6 +129,7 @@ export function MobileSidebar({ onCollapsedChange }: MobileSidebarProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   
   // Animated values
   const translateX = React.useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
@@ -133,6 +137,16 @@ export function MobileSidebar({ onCollapsedChange }: MobileSidebarProps) {
   
   // Screen dimensions
   const { width: screenWidth } = Dimensions.get('window');
+  
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      router.replace('/login');
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Failed to logout');
+    }
+  };
 
   // Initialize expanded state based on defaultExpanded
   useEffect(() => {
@@ -387,14 +401,26 @@ export function MobileSidebar({ onCollapsedChange }: MobileSidebarProps) {
         </ScrollView>
         
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={() => router.push('/(screens)/profile')}
+          >
             <View style={styles.profileAvatar}>
-              <Text style={styles.profileInitial}>U</Text>
+              <Text style={styles.profileInitial}>{user?.email?.[0].toUpperCase() || 'U'}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName} numberOfLines={1}>User Name</Text>
-              <Text style={styles.profileEmail} numberOfLines={1}>user@example.com</Text>
+              <Text style={styles.profileName} numberOfLines={1}>{user?.email?.split('@')[0] || 'User'}</Text>
+              <Text style={styles.profileEmail} numberOfLines={1}>{user?.email || 'user@example.com'}</Text>
             </View>
+            <Ionicons name="chevron-forward-outline" size={16} color={colors.text.secondary} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={20} color={colors.text.primary} />
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -558,6 +584,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.m,
+    marginBottom: spacing.s,
   },
   profileAvatar: {
     width: 40,
@@ -584,5 +611,19 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: fontSize.s,
     color: colors.text.secondary,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.m,
+    borderRadius: borderRadius.m,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  logoutText: {
+    marginLeft: spacing.s,
+    fontSize: fontSize.m,
+    color: colors.text.primary,
   },
 });
