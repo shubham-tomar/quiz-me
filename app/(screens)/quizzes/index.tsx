@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -7,7 +7,8 @@ import {
   Pressable, 
   Alert,
   ActivityIndicator,
-  SafeAreaView
+  SafeAreaView,
+  GestureResponderEvent
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
@@ -21,21 +22,25 @@ import { useAuth } from '../../../contexts/AuthContext';
 export default function QuizzesScreen() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
 
   // Load quizzes whenever the screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadQuizzes();
-    }, [])
-  );
-
-  const loadQuizzes = async () => {
+  const memoizedLoadQuizzes = useCallback(async (resetPage = true) => {
     try {
-      setLoading(true);
-      setError(null);
+      const currentPage = resetPage ? 0 : page + 1;
+      
+      if (resetPage) {
+        setLoading(true);
+        setError(null);
+        setPage(0);
+      } else {
+        setLoadingMore(true);
+      }
       
       if (!user) {
         setError('Please log in to view your quizzes.');
@@ -43,39 +48,104 @@ export default function QuizzesScreen() {
         return;
       }
 
-      console.log('Fetching quizzes for user:', user?.id);
-      const { data, error } = await getUserQuizzes();
+      console.log(`Loading quizzes for page: ${currentPage}`);
+      const response = await getUserQuizzes(currentPage);
       
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw response.error;
       }
       
-      console.log('Quizzes fetched:', data?.length || 0);
+      const { data, hasMore: moreAvailable } = response;
+      console.log(`Received ${data?.length || 0} quizzes, has more: ${moreAvailable}`);
       
-      // Fetch latest attempt for each quiz
-      const quizzesWithAttempts = await Promise.all(data.map(async (quiz) => {
-        console.log('Fetching attempts for quiz:', quiz.id);
-        const { data: attemptData, error: attemptError } = await getLatestQuizAttempt(quiz.id);
-        console.log('Attempt found:', attemptData ? 'YES' : 'NO', attemptError ? `Error: ${attemptError.message}` : '');
+      const quizzesWithAttempts = await Promise.all((data || []).map(async (quiz) => {
+        const { data: attemptData } = await getLatestQuizAttempt(quiz.id);
         return {
           ...quiz,
           latestAttempt: attemptData
         };
       }));
       
-      // Log quizzes with attempts
-      quizzesWithAttempts.forEach(quiz => {
-        console.log(`Quiz ${quiz.id}: ${quiz.title} - Attempt: ${quiz.latestAttempt ? 'Found' : 'Not found'}`);
-      });
-      
-      setQuizzes(quizzesWithAttempts || []);
+      if (resetPage) {
+        console.log('Resetting quiz list');
+        setQuizzes(quizzesWithAttempts);
+      } else {
+        console.log('Appending quizzes to list');
+        setQuizzes(prev => [...prev, ...quizzesWithAttempts]);
+      }
+
+      setHasMore(moreAvailable);
+      setPage(currentPage);
     } catch (err: any) {
       console.error('Error loading quizzes:', err);
       setError(err.message || 'Failed to load quizzes.');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  };
+  }, [page, user]);
+
+  // Use useRef to track if this is the initial load
+  const initialLoadDone = useRef(false);
+
+  // Only load quizzes when the screen comes into focus and it's the first time
+  useFocusEffect(
+    useCallback(() => {
+      // Only load on first focus or when returning to the screen
+      if (!initialLoadDone.current) {
+        console.log('Initial quiz load');
+        memoizedLoadQuizzes(true);
+        initialLoadDone.current = true;
+      }
+      
+      // Cleanup function for when screen loses focus
+      return () => {
+        // Reset the flag if we want to reload when focusing again
+        // Uncomment this if you want to reload each time the screen gains focus
+        // initialLoadDone.current = false;
+      };
+    }, [memoizedLoadQuizzes])
+  );
+
+  // Use the memoized function for all loading operations
+  const loadQuizzes = memoizedLoadQuizzes;
+
+  // Standalone function to load more quizzes without resetting the current list
+  const loadMoreQuizzes = useCallback(async () => {
+    if (!hasMore || loading || loadingMore) return;
+    
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      console.log(`Loading more quizzes: page ${nextPage}`);
+      
+      const response = await getUserQuizzes(nextPage);
+      if (response.error) throw response.error;
+      
+      const { data, hasMore: moreAvailable } = response;
+      console.log(`Loaded ${data?.length || 0} additional quizzes`);
+      
+      // Process quizzes
+      const quizzesWithAttempts = await Promise.all((data || []).map(async (quiz) => {
+        const { data: attemptData } = await getLatestQuizAttempt(quiz.id);
+        return { ...quiz, latestAttempt: attemptData };
+      }));
+      
+      // Append to existing list
+      setQuizzes(prev => [...prev, ...quizzesWithAttempts]);
+      setHasMore(moreAvailable);
+      setPage(nextPage);
+    } catch (err: any) {
+      console.error('Error loading more quizzes:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loading, loadingMore, page]);
+  
+  // Handler for the Load More button with proper GestureResponderEvent typing
+  const handleLoadMore = useCallback((_event: GestureResponderEvent) => {
+    loadMoreQuizzes();
+  }, [loadMoreQuizzes]);
 
   const handleTakeQuiz = (quizId: string) => {
     router.push({
@@ -229,7 +299,7 @@ export default function QuizzesScreen() {
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
             <Text style={styles.errorText}>{error}</Text>
-            <Pressable style={common.button} onPress={loadQuizzes}>
+            <Pressable style={common.button} onPress={() => memoizedLoadQuizzes(true)}>
               <Text style={common.buttonText}>Try Again</Text>
             </Pressable>
           </View>
@@ -271,6 +341,19 @@ export default function QuizzesScreen() {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
               showsVerticalScrollIndicator={false}
+              ListFooterComponent={hasMore ? (
+                <Pressable 
+                  style={[common.button, styles.loadMoreButton]}
+                  onPress={handleLoadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={common.buttonText}>Load More</Text>
+                  )}
+                </Pressable>
+              ) : null}
             />
           </>
         )}
@@ -409,6 +492,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.m,
     color: colors.text.secondary,
     marginTop: spacing.m,
+  },
+  loadMoreButton: {
+    marginTop: spacing.m,
+    marginBottom: spacing.l,
+    backgroundColor: colors.secondary,
   },
   errorContainer: {
     flex: 1,

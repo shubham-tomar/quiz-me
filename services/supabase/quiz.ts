@@ -51,24 +51,45 @@ export const createQuiz = async (title: string, source?: string) => {
   }
 };
 
-// Get all quizzes for the current user
-export const getUserQuizzes = async () => {
+// Get quizzes for the current user with pagination
+export const getUserQuizzes = async (page = 0, pageSize = 5) => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
       throw new Error('User not authenticated');
     }
 
-    const { data, error } = await supabase
+    // Calculate the range for Supabase pagination
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    console.log(`[Supabase] Fetching quizzes with range: ${from} to ${to} (page ${page}, pageSize ${pageSize})`);
+
+    const { data, error, count } = await supabase
       .from('quizzes')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
     
     if (error) throw error;
-    return { data, error: null };
+    
+    // Calculate if there are more pages
+    const hasMore = count ? count > (page + 1) * pageSize : false;
+    console.log(`[Supabase] Fetched ${data?.length} quizzes. Total count: ${count}. Has more: ${hasMore}`);
+    
+    // Return pagination metadata along with the data
+    return { 
+      data, 
+      error: null, 
+      hasMore, 
+      total: count,
+      page,
+      pageSize
+    };
   } catch (error: any) {
-    return { data: [], error };
+    console.error('[Supabase] Error fetching quizzes:', error);
+    return { data: [], error, hasMore: false, total: 0, page, pageSize };
   }
 };
 
