@@ -1,0 +1,17 @@
+{
+  "extends": "../../packages/shared/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@quizme/shared": ["../../packages/shared/src"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}
