@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 module.exports = {
   name: "QuizMe",
   slug: "quizme",
