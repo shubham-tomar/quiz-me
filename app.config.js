@@ -1,5 +1,6 @@
+require('dotenv').config();
+
 // Using default values for environment variables
-// Removed dotenv dependency as it's not compatible with React Native
 let localEnv = {};
 
 module.exports = {
