@@ -7,11 +7,15 @@
       "@/*": [
         "./*"
       ],
-      "@quizme/shared": ["../../packages/shared/src"]
+      "@quizme/shared": [
+        "../../packages/shared/src"
+      ]
     }
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }
