@@ -12,8 +12,10 @@ module.exports = {
   userInterfaceStyle: "automatic",
   extra: {
     // Add environment variables here so they're accessible via Constants.manifest.extra
-    AI_MODEL: process.env.AI_MODEL || localEnv.AI_MODEL || 'open_ai',
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY || localEnv.OPENAI_API_KEY,
+    EXPO_PUBLIC_AI_MODEL: process.env.EXPO_PUBLIC_AI_MODEL || localEnv.EXPO_PUBLIC_AI_MODEL || 'open_ai',
+    EXPO_PUBLIC_OPENAI_API_KEY: process.env.EXPO_PUBLIC_OPENAI_API_KEY || localEnv.EXPO_PUBLIC_OPENAI_API_KEY,
+    EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL || localEnv.EXPO_PUBLIC_SUPABASE_URL,
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || localEnv.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   },
   ios: {
     supportsTablet: true
