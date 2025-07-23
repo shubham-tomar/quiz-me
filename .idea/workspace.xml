@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="96970193-bd15-41b6-a0fb-8fa9a56a50d8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/my-turborepo/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/.expo-shared/assets.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/app.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/app/_layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/app/index.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/assets/adaptive-icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/assets/favicon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/assets/icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/assets/splash.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/babel.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/metro.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/native/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/.eslintrc.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/app/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/app/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/next-env.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/next.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/styles/global.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/styles/index.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/apps/web/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/typescript-config/base.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/typescript-config/nextjs.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/typescript-config/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/typescript-config/react-native-library.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/src/button.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/src/index.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/packages/ui/tsup.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-turborepo/turbo.json" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 5
+}]]></component>
+  <component name="ProjectId" id="30HPX5LNnLEI6STQenJjiF84PcO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "feature/mono-repo",
+    "kotlin-language-version-configured": "true"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="96970193-bd15-41b6-a0fb-8fa9a56a50d8" name="Changes" comment="" />
+      <created>1753281562095</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753281562095</updated>
+    </task>
+    <servers />
+  </component>
+</project>
