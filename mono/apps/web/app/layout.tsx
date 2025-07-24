@@ -1,4 +1,5 @@
 import "./globals.css";
+import { AuthProvider } from "@/context/auth-context";
 
 export const metadata = {
   title: "Quiz Me - AI-Powered Quiz Generation Platform",
@@ -12,7 +13,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
