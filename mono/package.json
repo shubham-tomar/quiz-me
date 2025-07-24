@@ -14,5 +14,9 @@
     "node": ">=18"
   },
   "name": "with-react-native-web",
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.52.1",
+    "date-fns": "^4.1.0"
+  }
 }

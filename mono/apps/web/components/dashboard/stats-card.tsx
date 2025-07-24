@@ -7,10 +7,7 @@ interface StatsCardProps {
   value: string | number;
   icon: LucideIcon;
   description?: string;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
+  isLoading?: boolean;
 }
 
 export function StatsCard({ 
@@ -18,35 +15,25 @@ export function StatsCard({
   value, 
   icon: Icon, 
   description, 
-  trend 
+  isLoading = false
 }: StatsCardProps) {
   return (
-    <div className="bg-white border rounded-lg p-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <h4 className="mt-2 text-2xl font-semibold">{value}</h4>
-          
-          {description && (
-            <p className="mt-1 text-sm text-gray-500">{description}</p>
-          )}
-          
-          {trend && (
-            <div className="mt-2 flex items-center">
-              <span className={`text-sm font-medium ${
-                trend.isPositive ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {trend.isPositive ? '+' : ''}{trend.value}%
-              </span>
-              <span className="ml-2 text-xs text-gray-500">from last period</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="p-3 bg-gray-50 rounded-full">
-          <Icon className="h-6 w-6 text-primary" />
+    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+        <div className="p-2 bg-blue-50 rounded-md">
+          <Icon size={18} className="text-blue-500" />
         </div>
       </div>
+      
+      {isLoading ? (
+        <div className="mt-2 h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+      ) : (
+        <p className="mt-2 text-3xl font-bold">{value}</p>
+      )}
+      
+      {description && !isLoading && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+      {isLoading && <div className="mt-1 h-4 w-24 bg-gray-200 rounded animate-pulse"></div>}
     </div>
   );
 }

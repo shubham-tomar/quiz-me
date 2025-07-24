@@ -1,36 +1,50 @@
 "use client";
 
 import { Activity, BookOpen, Share2 } from "lucide-react";
-import { ProfileCard } from "@/components/dashboard/profile-card";
-import { StatsCard } from "@/components/dashboard/stats-card";
-import { QuizList } from "@/components/dashboard/quiz-list";
+import { ProfileCard } from "../../../components/dashboard/profile-card";
+import { StatsCard } from "../../../components/dashboard/stats-card";
+import { useDashboardData } from "../../../hooks/use-dashboard-data";
+import { formatDistanceToNow } from "date-fns";
 
-// Sample data - in a real app, this would come from an API
-const sampleQuizzes = [
-  {
-    id: "1",
-    title: "JavaScript Basics",
-    description: "Fundamental concepts of JavaScript programming language",
-    questionsCount: 15,
-    createdAt: "2 days ago"
-  },
-  {
-    id: "2",
-    title: "React Hooks",
-    description: "Understanding React hooks and their usage patterns",
-    questionsCount: 10,
-    createdAt: "3 days ago"
-  },
-  {
-    id: "3",
-    title: "TypeScript Advanced",
-    description: "Advanced types, generics, and utility types in TypeScript",
-    questionsCount: 20,
-    createdAt: "1 week ago"
-  }
-];
+import { LoadingSpinner } from "../../../components/ui/loading-spinner";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { data, isLoading, error } = useDashboardData();
+
+  const formattedQuizzes = data?.quizzes || [];
+  const stats = data?.stats || {
+    averageScore: 0,
+    totalAttempts: 0,
+    totalQuizzesCreated: 0,
+    uniqueQuizzesTaken: 0
+  };
+
+  const handleViewQuiz = (quizId: string) => {
+    router.push(`/quiz/${quizId}`);
+  };
+  
+  const handleCreateQuiz = () => {
+    router.push("/quiz/create");
+  };
+  
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
+          Unable to load your dashboard data. Please try again later.
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-white rounded-md"
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
@@ -40,27 +54,93 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatsCard 
+              title="Average Score" 
+              value={isLoading ? "--" : `${Math.round(stats.averageScore)}%`} 
+              icon={BookOpen}
+              description="Your quiz performance"
+              isLoading={isLoading}
+            />
+            <StatsCard 
+              title="Total Attempts" 
+              value={isLoading ? "--" : stats.totalAttempts} 
+              icon={Activity}
+              description={`Across ${stats.uniqueQuizzesTaken} unique quizzes`}
+              isLoading={isLoading}
+            />
+            <StatsCard 
               title="Total Quizzes" 
-              value={12} 
-              icon={BookOpen} 
-              trend={{ value: 8, isPositive: true }}
-            />
-            <StatsCard 
-              title="Questions Generated" 
-              value={148} 
-              icon={Activity} 
-              trend={{ value: 12, isPositive: true }}
-            />
-            <StatsCard 
-              title="Times Shared" 
-              value={36} 
-              icon={Share2} 
-              trend={{ value: 5, isPositive: true }}
+              value={isLoading ? "--" : stats.totalQuizzesCreated} 
+              icon={Share2}
+              description="Quizzes you've created"
+              isLoading={isLoading}
             />
           </div>
           
           {/* Quiz List */}
-          <QuizList initialQuizzes={sampleQuizzes} />
+          {isLoading ? (
+            <div className="space-y-4 py-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex animate-pulse items-center space-x-4">
+                  <div className="h-12 w-full rounded bg-gray-200"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {formattedQuizzes.length > 0 ? (
+                <div className="divide-y">
+                  {formattedQuizzes.map((quiz) => (
+                    <div 
+                      key={quiz.id}
+                      className="flex flex-col sm:flex-row sm:items-center py-4 gap-2 sm:gap-4"
+                    >
+                      <div className="flex-1">
+                        <h4 className="font-medium">{quiz.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {quiz.description || "No description"}
+                          {quiz.created_at && (
+                            <span className="ml-2 text-xs">
+                              Created {formatDistanceToNow(new Date(quiz.created_at), { addSuffix: true })}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-end">
+                          <span className="font-medium">{quiz.questionsCount}</span>
+                          <span className="text-xs text-muted-foreground">Questions</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="font-medium">{quiz.attemptCount || 0}</span>
+                          <span className="text-xs text-muted-foreground">Attempts</span>
+                        </div>
+
+                        <button 
+                          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                          onClick={() => handleViewQuiz(quiz.id)}
+                        >
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-6 text-center">
+                  <p className="text-muted-foreground">You haven't created any quizzes yet.</p>
+                </div>
+              )}
+              
+              <div className="mt-6 flex justify-end border-t pt-4">
+                <button 
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  onClick={handleCreateQuiz}
+                >
+                  Create New Quiz
+                </button>
+              </div>
+            </>
+          )}
         </div>
         
         <div>
