@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
 type User = {
@@ -19,37 +19,32 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+// Create a singleton instance of Supabase client to prevent multiple instances
+let supabaseInstance: SupabaseClient | null = null;
+
+const getSupabase = (): SupabaseClient => {
+  if (supabaseInstance) return supabaseInstance;
   
-  // Initialize Supabase client with environment variables
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
-  console.log('AuthProvider init - SUPABASE URL:', supabaseUrl ? 'Exists' : 'Missing');
-  console.log('AuthProvider init - SUPABASE KEY:', supabaseAnonKey ? 'Exists' : 'Missing');
-  
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables');
-    // Return a limited context with authentication disabled
-    return (
-      <AuthContext.Provider
-        value={{
-          user: null,
-          loading: false,
-          signIn: async () => ({ error: new Error('Auth not configured') }),
-          signUp: async () => ({ error: new Error('Auth not configured') }),
-          signOut: async () => {}
-        }}
-      >
-        {children}
-      </AuthContext.Provider>
-    );
+    throw new Error('Missing Supabase environment variables');
   }
   
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+  
+  return supabaseInstance;
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [user, setUser] = useState<User>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Get the singleton Supabase client
+  const supabase = getSupabase();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -62,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user) {
         console.log('AuthProvider - User authenticated:', session.user.email);
-        setUser(session.user);
+        setUser(session.user as User);
       } else {
         console.log('AuthProvider - No user found in session');
         setUser(null);
@@ -75,9 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for authentication state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser(session.user);
+        setUser(session.user as User);
       } else {
         setUser(null);
       }
@@ -87,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase.auth, router]);
 
   const signIn = async (email: string, password: string) => {
     console.log('AuthProvider - signIn() called with email:', email);
@@ -122,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     router.push('/login');
+    console.log('AuthProvider - signOut() called');
   };
 
   const value = {

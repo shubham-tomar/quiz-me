@@ -1,7 +1,7 @@
 "use client";
 
 import { Sidebar } from "@/components/layout/sidebar";
-import { MobileSidebar } from "@/components/layout/mobile-sidebar";
+// import { MobileSidebar } from "@/components/layout/mobile-sidebar";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
 export default function DashboardLayout({
@@ -17,7 +17,7 @@ export default function DashboardLayout({
         <div className="flex-1 flex flex-col">
           <header className="border-b bg-background/95 backdrop-blur">
             <div className="container flex h-16 items-center justify-between">
-              <MobileSidebar />
+              {/* <MobileSidebar /> */}
               <div className="flex-1"></div>
             </div>
           </header>
