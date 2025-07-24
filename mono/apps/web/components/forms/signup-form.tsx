@@ -15,13 +15,18 @@ export function SignupForm() {
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('SignupForm - handleSubmit called');
     setError(null);
     setIsLoading(true);
     
+    console.log('SignupForm - Attempting signup with:', email);
     const { error } = await signUp(email, password);
     
     if (error) {
+      console.error('SignupForm - Signup error:', error.message);
       setError(error.message || 'An error occurred during sign up');
+    } else {
+      console.log('SignupForm - Signup successful');
     }
     
     setIsLoading(false);

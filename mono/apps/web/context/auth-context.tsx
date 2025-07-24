@@ -28,6 +28,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
+  console.log('AuthProvider init - SUPABASE URL:', supabaseUrl ? 'Exists' : 'Missing');
+  console.log('AuthProvider init - SUPABASE KEY:', supabaseAnonKey ? 'Exists' : 'Missing');
+  
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables');
     // Return a limited context with authentication disabled
@@ -51,12 +54,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active sessions and sets the user
     const getSession = async () => {
+      console.log('AuthProvider - getSession() called');
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       
+      console.log('AuthProvider - Session data:', session ? 'Exists' : 'None');
+      
       if (session?.user) {
+        console.log('AuthProvider - User authenticated:', session.user.email);
         setUser(session.user);
       } else {
+        console.log('AuthProvider - No user found in session');
         setUser(null);
       }
       
@@ -82,29 +90,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (!error) {
-      router.push('/dashboard');
+    console.log('AuthProvider - signIn() called with email:', email);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      console.log('AuthProvider - signIn result:', error ? `Error: ${error.message}` : 'Success');
+      if (!error) {
+        router.push('/dashboard');
+      }
+      return { error };
+    } catch (error: any) {
+      console.error('AuthProvider - signIn exception:', error);
+      return { error };
     }
-    
-    return { error };
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    
-    if (!error) {
-      router.push('/login');
+    console.log('AuthProvider - signUp() called with email:', email);
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      console.log('AuthProvider - signUp result:', error ? `Error: ${error.message}` : 'Success');
+      if (!error) {
+        router.push('/login');
+      }
+      return { error };
+    } catch (error: any) {
+      console.error('AuthProvider - signUp exception:', error);
+      return { error };
     }
-    
-    return { error };
   };
 
   const signOut = async () => {

@@ -14,13 +14,18 @@ export function LoginForm() {
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('LoginForm - handleSubmit called');
     setError(null);
     setIsLoading(true);
     
+    console.log('LoginForm - Attempting sign in with:', email);
     const { error } = await signIn(email, password);
     
     if (error) {
+      console.error('LoginForm - Sign in error:', error.message);
       setError(error.message || 'An error occurred during sign in');
+    } else {
+      console.log('LoginForm - Sign in successful');
     }
     
     setIsLoading(false);

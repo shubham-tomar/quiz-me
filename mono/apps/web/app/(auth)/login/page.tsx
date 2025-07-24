@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Brain } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LoginForm } from "@/components/forms/login-form";
 
 export default function LoginPage() {
   return (
@@ -18,47 +18,7 @@ export default function LoginPage() {
         <p className="text-muted-foreground">Enter your credentials to access your account</p>
       </div>
       
-      <form className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="w-full p-2 border rounded-md"
-            placeholder="your@email.com"
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Link href="#" className="text-sm text-primary hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <input
-            id="password"
-            type="password"
-            className="w-full p-2 border rounded-md"
-            placeholder="••••••••"
-          />
-        </div>
-        <Button type="submit" className="w-full">
-          Sign In
-        </Button>
-      </form>
-      
-      <div className="text-center text-sm">
-        <p className="text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-primary hover:underline">
-            Sign up
-          </Link>
-        </p>
-      </div>
+      <LoginForm />
     </div>
   );
 }

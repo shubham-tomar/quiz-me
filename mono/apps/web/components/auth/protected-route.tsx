@@ -10,12 +10,22 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    console.log('ProtectedRoute - Component mounted');
     setMounted(true);
   }, []);
 
   useEffect(() => {
+    console.log('ProtectedRoute - Auth state changed:', { 
+      loading, 
+      mounted, 
+      userExists: !!user 
+    });
+    
     if (!loading && mounted && !user) {
+      console.log('ProtectedRoute - Unauthorized access, redirecting to login');
       router.push("/login");
+    } else if (!loading && mounted && user) {
+      console.log('ProtectedRoute - User authenticated:', user.email);
     }
   }, [user, loading, mounted, router]);
 

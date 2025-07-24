@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Brain } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { SignupForm } from "@/components/forms/signup-form";
 
 export default function SignupPage() {
   return (
@@ -18,53 +18,8 @@ export default function SignupPage() {
         <p className="text-muted-foreground">Enter your information to get started</p>
       </div>
       
-      <form className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="name" className="text-sm font-medium">
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            className="w-full p-2 border rounded-md"
-            placeholder="John Doe"
-          />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="w-full p-2 border rounded-md"
-            placeholder="your@email.com"
-          />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            className="w-full p-2 border rounded-md"
-            placeholder="••••••••"
-          />
-        </div>
-        <Button type="submit" className="w-full">
-          Sign Up
-        </Button>
-      </form>
-      
-      <div className="text-center text-sm">
-        <p className="text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/login" className="text-primary hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </div>
+      <SignupForm />
+
     </div>
   );
 }

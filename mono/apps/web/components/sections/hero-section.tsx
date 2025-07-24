@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Brain } from "lucide-react";
 import { Button } from "../ui/button";
 
 export function HeroSection() {
@@ -16,23 +16,27 @@ export function HeroSection() {
           Upload text, PDFs, images, audio, videos or paste a website URL — all processed in 1-click with our powerful AI.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Button size="lg">
-            Try Quiz Me for Free
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="lg">
-            View Demo
-          </Button>
+          <Link href="/signup">
+            <Button size="lg" variant="gradient" className="group">
+              Start for free
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button variant="outline" size="lg">
+              Login
+            </Button>
+          </Link>
         </div>
       </div>
-      <div className="flex-1">
-        <div className="relative w-full aspect-square md:aspect-video max-w-md md:max-w-lg">
-          {/* Replace with actual screenshot or hero image */}
-          <div className="bg-muted rounded-lg w-full h-full flex items-center justify-center">
-            <p className="text-muted-foreground">Hero Image Placeholder</p>
+      <div className="flex-1 relative hidden md:block">
+          <div className="aspect-video w-full relative bg-gradient-to-tr from-blue-100 to-indigo-100 rounded-lg overflow-hidden shadow-xl">
+            {/* Placeholder for hero image */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Brain className="h-32 w-32 text-primary/30" />
+            </div>
           </div>
         </div>
-      </div>
     </section>
   );
 }
