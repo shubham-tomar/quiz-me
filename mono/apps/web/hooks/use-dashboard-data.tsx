@@ -17,45 +17,48 @@ export type DashboardData = {
 export function useDashboardData() {
   const { user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        
-        // Fetch quizzes with stats using our service
-        const quizzes = await quizApi.getQuizWithStats(user.id);
-        
-        // Fetch user attempt stats using our service
-        const stats = await attemptApi.getUserStats(user.id);
-        
-        // Use type assertion to ensure TypeScript recognizes the structure
-        const typedStats: UserStats = {
-          totalAttempts: stats.totalAttempts || 0,
-          averageScore: stats.averageScore || 0,
-          uniqueQuizzesTaken: stats.uniqueQuizzesTaken || 0,
-          // Use optional chaining and nullish coalescing to safely access property
-          totalQuizzesCreated: (stats as any).totalQuizzesCreated || 0
-        };
-        
-        setData({ quizzes, stats: typedStats });
-      } catch (err: any) {
-        console.error('Error fetching dashboard data:', err);
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     
-    fetchData();
+    try {
+      setIsLoading(true);
+      
+      // Fetch quizzes with stats using our service
+      const quizzes = await quizApi.getQuizWithStats(user.id);
+      
+      // Fetch user attempt stats using our service
+      const stats = await attemptApi.getUserStats(user.id);
+      
+      // Use type assertion to ensure TypeScript recognizes the structure
+      const typedStats: UserStats = {
+        totalAttempts: stats.totalAttempts || 0,
+        averageScore: stats.averageScore || 0,
+        uniqueQuizzesTaken: stats.uniqueQuizzesTaken || 0,
+        // Use optional chaining and nullish coalescing to safely access property
+        totalQuizzesCreated: (stats as any).totalQuizzesCreated || 0
+      };
+      
+      setData({ quizzes, stats: typedStats });
+    } catch (err: any) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load data on initial mount only
+  useEffect(() => {
+    if (!data && user) {
+      fetchData();
+    }
   }, [user]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refresh: fetchData };
 }

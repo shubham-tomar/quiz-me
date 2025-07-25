@@ -1,7 +1,7 @@
 "use client";
 
-import { Activity, BookOpen, Share2 } from "lucide-react";
-import { ProfileCard } from "../../../components/dashboard/profile-card";
+import { useState } from "react";
+import { Activity, BookOpen, Share2, RefreshCw } from "lucide-react";
 import { StatsCard } from "../../../components/dashboard/stats-card";
 import { useDashboardData } from "../../../hooks/use-dashboard-data";
 import { formatDistanceToNow } from "date-fns";
@@ -11,7 +11,14 @@ import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data, isLoading, error } = useDashboardData();
+  const { data, isLoading, error, refresh } = useDashboardData();
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+  
+  const handleRefresh = async () => {
+    await refresh();
+    setRefreshSuccess(true);
+    setTimeout(() => setRefreshSuccess(false), 2000);
+  };
 
   const formattedQuizzes = data?.quizzes || [];
   const stats = data?.stats || {
@@ -47,7 +54,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold">Dashboard Overview</h1>
+        <button 
+          onClick={handleRefresh}
+          className={`inline-flex items-center justify-center rounded-full p-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${refreshSuccess ? 'bg-green-100 text-green-600' : isLoading ? 'bg-blue-100 text-blue-600 animate-pulse' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105 active:scale-95'}`}
+          disabled={isLoading}
+          aria-label="Refresh data"
+          title="Refresh dashboard data"
+        >
+          <RefreshCw 
+            className={`h-5 w-5 ${isLoading ? 'animate-spin' : refreshSuccess ? 'animate-bounce' : 'hover:rotate-180 transition-transform duration-500'}`}
+          />
+        </button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 space-y-8">
@@ -141,10 +161,6 @@ export default function DashboardPage() {
               </div>
             </>
           )}
-        </div>
-        
-        <div>
-          <ProfileCard />
         </div>
       </div>
     </div>
