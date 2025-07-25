@@ -2,8 +2,8 @@
 
 export function StatsSection() {
   return (
-    <section className="container py-12 border-y">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <section className="w-full py-12">
+      <div className="container grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
         <div className="flex flex-col items-center text-center">
           <div className="text-3xl font-bold">50k+</div>
           <div className="text-muted-foreground">Users</div>

@@ -65,7 +65,7 @@ export function TargetUsersSection() {
             </li>
             <li className="flex items-start">
               <CheckCircle2 className="h-5 w-5 text-primary mr-2 mt-0.5" />
-              <span>Track skills development with comprehensive reporting</span>
+              <span>Track skills development with analytics</span>
             </li>
           </ul>
           <Button className="w-full mt-4">Business Plans</Button>

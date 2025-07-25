@@ -6,6 +6,7 @@ import { FeaturesSection } from "@/components/sections/features-section";
 import { HowItWorksSection } from "@/components/sections/how-it-works-section";
 import { TargetUsersSection } from "@/components/sections/target-users-section";
 import { CtaSection } from "@/components/sections/cta-section";
+import { PricingSection } from "@/components/marketing/pricing-section";
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
       <FeaturesSection />
       <HowItWorksSection />
       <TargetUsersSection />
+      <PricingSection />
       <CtaSection />
     </>
   );

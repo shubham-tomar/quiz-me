@@ -54,7 +54,7 @@ const pricingPlans = [
 
 export function PricingSection() {
   return (
-    <section className="py-16 bg-white" id="pricing">
+    <section className="py-16 bg-green-50" id="pricing">
       <div className="container px-4 mx-auto">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
@@ -67,7 +67,7 @@ export function PricingSection() {
           {pricingPlans.map((plan) => (
             <div 
               key={plan.name} 
-              className={`relative rounded-lg border ${
+              className={`relative rounded-lg border bg-white ${
                 plan.popular 
                   ? "border-primary shadow-lg" 
                   : "border-gray-200"
