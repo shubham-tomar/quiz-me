@@ -9,7 +9,7 @@ export default function CreateQuizPage() {
         <h1 className="text-3xl font-bold">Create Quiz</h1>
       </div>
       
-      <div className="border rounded-lg p-6 bg-background">
+      <div className="border border-border rounded-lg p-6 bg-card shadow-sm">
         <QuizForm />
       </div>
     </div>

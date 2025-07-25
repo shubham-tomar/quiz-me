@@ -1,0 +1,48 @@
+/* Dark mode specific fixes */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark textarea {
+  background-color: hsl(222 47% 11%);
+  border-color: hsl(215 28% 17%);
+  color: hsl(210 40% 98%);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(215 20.2% 65.1%);
+}
+
+.dark .bg-card,
+.dark [class*="bg-card"] {
+  background-color: hsl(224 71% 4%);
+}
+
+.dark .border-border {
+  border-color: hsl(216 34% 17%);
+}
+
+/* Improve button visibility in dark mode */
+.dark button.bg-primary:hover {
+  background-color: hsl(210 100% 60%);
+}
+
+/* Dashboard cards with enhanced contrast */
+.dark [class*="shadow"] {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Better hover states for interactive elements */
+.dark .hover\:bg-muted:hover {
+  background-color: hsl(223 47% 15%);
+}
+
+/* Enhance text readability */
+.dark .text-muted-foreground {
+  color: hsl(215 20.2% 75%);
+}
+
+/* Focus styles */
+.dark *:focus-visible {
+  outline-color: hsl(210 100% 66%);
+}

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Brain, Menu, X } from "lucide-react";
+import { Brain, Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function MobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,17 +61,37 @@ export function MobileSidebar() {
               </Link>
             </nav>
             
+            <div className="p-4 border-t flex items-center justify-between">
+              <ThemeToggle variant="full" />
+            </div>
+            
             {user && (
-              <div className="p-4 border-t">
-                <div className="text-sm mb-2">{user.email}</div>
+              <div className="p-4 border-t space-y-2">
+                <Link 
+                  href="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/80"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <User size={16} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">{user.email}</div>
+                    <div className="text-xs text-muted-foreground">View Profile</div>
+                  </div>
+                </Link>
+                
                 <button 
                   onClick={() => {
                     signOut();
                     setIsOpen(false);
                   }}
-                  className="text-sm text-primary hover:underline"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/80 w-full text-left"
                 >
-                  Logout
+                  <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                    <LogOut size={16} className="text-muted-foreground" />
+                  </div>
+                  <span className="text-sm">Logout</span>
                 </button>
               </div>
             )}

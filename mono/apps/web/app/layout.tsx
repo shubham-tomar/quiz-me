@@ -1,5 +1,7 @@
 import "./globals.css";
+import "@/styles/dark-mode-fixes.css";
 import { AuthProvider } from "@/context/auth-context";
+import { ThemeProvider } from "@/context/theme-context";
 
 export const metadata = {
   title: "Quiz Me - AI-Powered Quiz Generation Platform",
@@ -14,9 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

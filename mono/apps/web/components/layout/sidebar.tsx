@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Brain, Layout, BookOpen, Plus, Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface NavItemProps {
   href: string;
@@ -67,7 +68,7 @@ export function Sidebar() {
 
   // Blob animation values with improved stability
   const width = useMotionValue(isOpen ? expandedWidth : collapsedWidth);
-  const springWidth = useSpring(width, { damping: 25, stiffness: 400, mass: 0.5 });
+  const springWidth = useSpring(width, { damping: 15, stiffness: 600, mass: 0.7 });
 
   // Create blob path transform with smoother transition
   const blobPath = useTransform(springWidth, (latest) => {
@@ -301,6 +302,17 @@ export function Sidebar() {
             ))}
           </motion.nav>
 
+          {/* Theme Toggle */}
+          <div className="px-3 mb-2">
+            {isOpen ? (
+              <ThemeToggle variant="full" className="w-full justify-between" />
+            ) : (
+              <div className="flex justify-center">
+                <ThemeToggle variant="icon" />
+              </div>
+            )}
+          </div>
+
           {/* User Profile */}
           {user && (
             <motion.div
@@ -309,26 +321,34 @@ export function Sidebar() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/80">
-                <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                  <User size={18} />
-                </div>
+              <div className="flex flex-col space-y-2">
+                <Link href="/profile">
+                  <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/80 cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                      <User size={18} />
+                    </div>
 
-                {(isOpen || isMobile) && (
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-medium truncate">{user.email}</span>
-                    <button
-                      onClick={async () => {
-                        await signOut();
-                        window.location.href = '/';
-                      }}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
-                    >
-                      <LogOut size={12} />
-                      <span>Logout</span>
-                    </button>
+                    {(isOpen || isMobile) && (
+                      <div className="overflow-hidden">
+                        <span className="text-sm font-medium truncate">{user.email}</span>
+                        <p className="text-xs text-muted-foreground">View Profile</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </Link>
+                
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    window.location.href = '/';
+                  }}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/80 w-full text-left text-sm"
+                >
+                  <div className="w-9 h-9 rounded-full bg-muted/50 flex items-center justify-center flex-shrink-0">
+                    <LogOut size={16} className="text-muted-foreground" />
+                  </div>
+                  {(isOpen || isMobile) && <span>Logout</span>}
+                </button>
               </div>
             </motion.div>
           )}

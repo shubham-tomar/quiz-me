@@ -49,7 +49,7 @@ export function QuizForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium">
+        <label htmlFor="title" className="text-sm font-medium text-foreground">
           Quiz Title
         </label>
         <input
@@ -58,13 +58,13 @@ export function QuizForm() {
           value={formData.title}
           onChange={handleChange}
           required
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Enter quiz title"
         />
       </div>
       
       <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium">
+        <label htmlFor="description" className="text-sm font-medium text-foreground">
           Description
         </label>
         <input
@@ -72,13 +72,13 @@ export function QuizForm() {
           name="description"
           value={formData.description}
           onChange={handleChange}
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Enter a short description"
         />
       </div>
       
       <div className="space-y-2">
-        <label htmlFor="content" className="text-sm font-medium">
+        <label htmlFor="content" className="text-sm font-medium text-foreground">
           Content for Quiz Generation
         </label>
         <textarea
@@ -88,7 +88,7 @@ export function QuizForm() {
           onChange={handleChange}
           required
           rows={8}
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Paste your content (text, article, notes) here to generate quiz questions"
         />
       </div>
