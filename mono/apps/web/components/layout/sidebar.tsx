@@ -211,10 +211,35 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* Fixed Header - Always visible */}
+      <div className="fixed top-0 left-0 z-50 flex items-center justify-between h-16 w-full border-b border-border bg-background dark:bg-zinc-900 px-4">
+        <div className="flex items-center gap-4">
+          {!isMobile && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-lg bg-muted/80 hover:bg-muted"
+            >
+              <Menu size={18} />
+            </motion.button>
+          )}
+          
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <Brain className="h-6 w-6 text-primary" />
+            <span className="whitespace-nowrap">Quiz Me</span>
+          </div>
+        </div>
+        
+        <div>{
+          /* Right side space - can be used for additional header elements */
+        }</div>
+      </div>
+      
+      {/* Sidebar - Content area collapses */}
       <AnimatePresence initial={false}>
         <motion.aside
-          className={`${isMobile ? (isOpen ? 'fixed' : 'hidden') : 'relative'} h-screen z-40 flex flex-col ${isMobile ? 'bg-background border-r shadow-sm' : 'bg-transparent'}`}
+          className={`h-screen pt-16 z-40 flex flex-col ${isMobile ? (isOpen ? 'fixed bg-background border-r shadow-sm' : 'hidden') : 'relative backdrop-blur-md bg-white/60 dark:bg-zinc-900/60 border-r border-border shadow-lg'}`}
           variants={isMobile ? mobileMenuVariants : sidebarVariants}
           initial={false}
           animate={isOpen ? "open" : "collapsed"}
@@ -222,32 +247,7 @@ export function Sidebar() {
           style={!isMobile ? { width: springWidth } : undefined}
           key="sidebar"
         >
-          {/* Header */}
-          <div className="flex items-center p-4 justify-between">
-            <div className="flex items-center gap-2 font-bold text-xl">
-              <Brain className="h-6 w-6 text-primary" />
-              {isOpen && !isMobile && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  Quiz Me
-                </motion.span>
-              )}
-              {isMobile && <span>Quiz Me</span>}
-            </div>
-            {!isMobile && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={toggleSidebar}
-                className="p-1.5 rounded-lg bg-muted/80 hover:bg-muted"
-              >
-                <Menu size={18} />
-              </motion.button>
-            )}
-          </div>
+          {/* Content starts directly without nested header */}
 
           {/* Nav Menu */}
           <motion.nav
