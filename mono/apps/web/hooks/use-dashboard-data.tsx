@@ -22,18 +22,22 @@ export function useDashboardData() {
 
   const fetchData = async () => {
     if (!user) {
+      console.log('Dashboard: No user found, skipping data fetch');
       setIsLoading(false);
       return;
     }
     
     try {
       setIsLoading(true);
+      console.log('Dashboard: Fetching data for user:', user.id);
       
       // Fetch quizzes with stats using our service
       const quizzes = await quizApi.getQuizWithStats(user.id);
+      console.log('Dashboard: Fetched quizzes:', quizzes.length);
       
       // Fetch user attempt stats using our service
       const stats = await attemptApi.getUserStats(user.id);
+      console.log('Dashboard: Fetched stats:', stats);
       
       // Use type assertion to ensure TypeScript recognizes the structure
       const typedStats: UserStats = {
@@ -45,6 +49,7 @@ export function useDashboardData() {
       };
       
       setData({ quizzes, stats: typedStats });
+      console.log('Dashboard: Data set successfully');
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
       setError(err);

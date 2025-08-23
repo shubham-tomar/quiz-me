@@ -12,6 +12,20 @@ export const quizApi = {
     if (error) throw error;
     return data || [];
   },
+
+  async getQuizById(quizId: string): Promise<Quiz | null> {
+    const { data, error } = await supabase
+      .from('quizzes')
+      .select(`
+        *,
+        questions:questions(*)
+      `)
+      .eq('id', quizId)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  },
   
   async getQuizWithStats(userId: string): Promise<QuizWithStats[]> {
     // Get quizzes with question counts

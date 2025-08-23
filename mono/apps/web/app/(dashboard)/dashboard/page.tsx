@@ -29,11 +29,11 @@ export default function DashboardPage() {
   };
 
   const handleViewQuiz = (quizId: string) => {
-    router.push(`/quiz/${quizId}`);
+    router.push(`/quizzes/${quizId}`);
   };
   
   const handleCreateQuiz = () => {
-    router.push("/quiz/create");
+    router.push("/quizzes/create");
   };
   
   if (error) {
