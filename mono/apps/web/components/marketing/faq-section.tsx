@@ -38,11 +38,11 @@ export function FAQSection() {
   };
 
   return (
-    <section className="py-16 bg-gray-50" id="faq">
+    <section className="py-16 marketing-faq-bg" id="faq">
       <div className="container px-4 mx-auto">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl marketing-faq-text">
             Everything you need to know about Quiz-Me
           </p>
         </div>
@@ -52,7 +52,7 @@ export function FAQSection() {
             {faqs.map((faq, index) => (
               <div 
                 key={index} 
-                className="border rounded-lg bg-white overflow-hidden"
+                className="marketing-faq-card rounded-lg overflow-hidden"
               >
                 <button
                   className="flex justify-between items-center w-full p-6 text-left"
@@ -60,15 +60,15 @@ export function FAQSection() {
                 >
                   <h3 className="font-medium text-lg">{faq.question}</h3>
                   {openIndex === index ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
+                    <ChevronUp className="h-5 w-5 marketing-faq-icon" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                    <ChevronDown className="h-5 w-5 marketing-faq-icon" />
                   )}
                 </button>
                 
                 {openIndex === index && (
                   <div className="px-6 pb-6">
-                    <p className="text-gray-600">{faq.answer}</p>
+                    <p className="marketing-faq-text">{faq.answer}</p>
                   </div>
                 )}
               </div>
@@ -76,7 +76,7 @@ export function FAQSection() {
           </div>
           
           <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-4">
+            <p className="marketing-faq-text mb-4">
               Still have questions? We're here to help.
             </p>
             <a 

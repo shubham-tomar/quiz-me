@@ -54,11 +54,11 @@ const pricingPlans = [
 
 export function PricingSection() {
   return (
-    <section className="py-16 bg-green-50" id="pricing">
+    <section className="py-16 marketing-pricing-bg" id="pricing">
       <div className="container px-4 mx-auto">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl marketing-pricing-text">
             Choose the plan that fits your needs. All plans include a 14-day free trial.
           </p>
         </div>
@@ -67,10 +67,10 @@ export function PricingSection() {
           {pricingPlans.map((plan) => (
             <div 
               key={plan.name} 
-              className={`relative rounded-lg border bg-white ${
+              className={`relative rounded-lg marketing-pricing-card ${
                 plan.popular 
-                  ? "border-primary shadow-lg" 
-                  : "border-gray-200"
+                  ? "marketing-pricing-popular shadow-lg" 
+                  : ""
               } p-8 flex flex-col`}
             >
               {plan.popular && (
@@ -84,17 +84,17 @@ export function PricingSection() {
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">{plan.price}</span>
                   {plan.period && (
-                    <span className="ml-1 text-sm text-gray-500">{plan.period}</span>
+                    <span className="ml-1 text-sm marketing-pricing-text">{plan.period}</span>
                   )}
                 </div>
-                <p className="text-gray-600 mb-6">{plan.description}</p>
+                <p className="marketing-pricing-text mb-6">{plan.description}</p>
               </div>
               
               <div className="flex-grow">
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-2">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full marketing-pricing-check flex items-center justify-center mr-2">
                         <Check className="h-3 w-3" />
                       </div>
                       <span>{feature}</span>
@@ -118,7 +118,7 @@ export function PricingSection() {
         </div>
         
         <div className="text-center mt-12">
-          <p className="text-gray-600">
+          <p className="marketing-pricing-text">
             All plans come with a 14-day free trial. No credit card required.
           </p>
         </div>

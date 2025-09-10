@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Brain } from "lucide-react";
 import { Button } from "../ui/button";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 export function Header() {
   return (
@@ -19,6 +20,7 @@ export function Header() {
           <Link href="#pricing" className="text-sm font-medium hover:text-primary">Pricing</Link>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle variant="icon" />
           <Link href="/login">
             <Button variant="outline" className="hidden md:inline-flex">Log In</Button>
           </Link>

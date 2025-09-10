@@ -1,5 +1,6 @@
 import "./globals.css";
 import "@/styles/dark-mode-fixes.css";
+import "@/styles/marketing-theme.css";
 import { AuthProvider } from "@/context/auth-context";
 import { ThemeProvider } from "@/context/theme-context";
 

@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 
 export function CtaSection() {
   return (
-    <section className="container py-20 text-center">
+    <section className="container marketing-cta-bg py-20 text-center">
       <div className="max-w-3xl mx-auto space-y-8">
         <h2 className="text-4xl font-bold">Ready to transform the way you create quizzes?</h2>
         <p className="text-xl text-muted-foreground">

@@ -1,0 +1,160 @@
+/* Marketing section theme styles */
+
+/* Hero section styles */
+.marketing-hero-bg {
+  background-color: hsl(191 91% 36% / 0.1);
+}
+.dark .marketing-hero-bg {
+  background-color: hsl(222 84% 5%);
+}
+
+.marketing-hero-gradient {
+  background: linear-gradient(to top right, hsl(214 100% 90%), hsl(243 75% 90%));
+}
+.dark .marketing-hero-gradient {
+  background: linear-gradient(to top right, hsl(215 28% 17%), hsl(215 20.2% 21%));
+}
+
+/* Stats section styles */
+.marketing-stats-bg {
+  background-color: hsl(253, 51%, 93%);
+  color: hsl(0, 29%, 19%);
+}
+.dark .marketing-stats-bg {
+  background-color: hsl(222 84% 5%);
+  color: hsl(0 0% 95%);
+}
+
+/* Features section styles */
+.marketing-features-bg {
+  background-color: hsl(var(--background));
+}
+.dark .marketing-features-bg {
+  background-color: hsl(222 84% 5%);
+}
+
+.marketing-feature-card {
+  background-color: hsl(var(--card));
+  transition: background-color 0.2s;
+}
+.marketing-feature-card:hover {
+  background-color: hsl(var(--card) / 0.8);
+}
+.dark .marketing-feature-card {
+  background-color: hsl(215 28% 17%);
+}
+.dark .marketing-feature-card:hover {
+  background-color: hsl(215 20.2% 21% / 0.8);
+}
+
+/* CTA section styles */
+.marketing-cta-bg {
+  background-color: hsl(221, 51%, 93%);
+  color: hsl(210, 9%, 22%);
+}
+.dark .marketing-cta-bg {
+  background-color: hsl(217 32% 17%);
+  color: hsl(210 40% 98%);
+}
+
+/* How it works section styles */
+.marketing-step-card {
+  background-color: hsl(var(--card));
+}
+.dark .marketing-step-card {
+  background-color: hsl(215 28% 17%);
+}
+
+/* Target users section styles */
+.marketing-user-card {
+  background-color: hsl(var(--card));
+  transition: background-color 0.2s;
+}
+.marketing-user-card:hover {
+  background-color: hsl(var(--card) / 0.8);
+}
+.dark .marketing-user-card {
+  background-color: hsl(215 28% 17%);
+}
+.dark .marketing-user-card:hover {
+  background-color: hsl(215 20.2% 21% / 0.8);
+}
+
+/* Marketing specific borders */
+.marketing-border {
+  border-color: hsl(var(--border));
+}
+.dark .marketing-border {
+  border-color: hsl(215 20.2% 21%);
+}
+
+/* FAQ section styles */
+.marketing-faq-bg {
+  background-color: hsl(220 14% 96%);
+}
+.dark .marketing-faq-bg {
+  background-color: hsl(222 84% 5%);
+}
+
+.marketing-faq-card {
+  background-color: hsl(0 0% 100%);
+  border-color: hsl(var(--border));
+}
+.dark .marketing-faq-card {
+  background-color: hsl(215 28% 17%);
+  border-color: hsl(215 20.2% 21%);
+}
+
+.marketing-faq-text {
+  color: hsl(215 16% 47%);
+}
+.dark .marketing-faq-text {
+  color: hsl(215 20.2% 65%);
+}
+
+.marketing-faq-icon {
+  color: hsl(215 16% 47%);
+}
+.dark .marketing-faq-icon {
+  color: hsl(215 20.2% 65%);
+}
+
+/* Pricing section styles */
+.marketing-pricing-bg {
+  background-color: hsl(122 39% 95%);
+}
+.dark .marketing-pricing-bg {
+  background-color: hsl(222 84% 5%);
+}
+
+.marketing-pricing-card {
+  background-color: hsl(0 0% 100%);
+  border-color: hsl(214 32% 91%);
+}
+.dark .marketing-pricing-card {
+  background-color: hsl(215 28% 17%);
+  border-color: hsl(215 20.2% 21%);
+}
+
+.marketing-pricing-popular {
+  border-color: hsl(var(--primary));
+}
+.dark .marketing-pricing-popular {
+  border-color: hsl(204 100% 50%);
+}
+
+.marketing-pricing-text {
+  color: hsl(215 16% 47%);
+}
+.dark .marketing-pricing-text {
+  color: hsl(215 20.2% 65%);
+}
+
+.marketing-pricing-check {
+  background-color: hsl(122 39% 89%);
+  color: hsl(142 76% 36%);
+}
+.dark .marketing-pricing-check {
+  background-color: hsl(122 39% 15%);
+  color: hsl(142 85% 60%);
+}
